@@ -38,8 +38,7 @@ export default function Header() {
             </div>
           </div>
           {/* Left side (Icons & User) */}
-          <div className="flex items-center gap-x-4">
-            <FaBell className="text-slate-400 hover:text-white cursor-pointer" />
+          <div className="flex items-center gap-x-6">
             <div className="flex items-center gap-x-2 cursor-pointer">
               <FaUserCircle size={28} className="text-blue-400" />
 
@@ -47,6 +46,7 @@ export default function Header() {
                 طراح سایت
               </span>
             </div>
+            <FaBell className="text-slate-400 hover:text-white cursor-pointer w-5 h-5" />
           </div>
         </div>
       </div>
