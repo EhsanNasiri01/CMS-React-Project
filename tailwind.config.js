@@ -15,7 +15,7 @@ module.exports = {
       container: {
         center: true,
         screens: {
-          DEFAULT: "1775px",
+          DEFAULT: "1740px",
         },
       },
     },

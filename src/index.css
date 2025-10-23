@@ -26,4 +26,13 @@
       format("woff2");
     font-display: swap;
   }
+  .shadow-primary {
+    box-shadow: 0 4px 40px rgba(0, 246, 255, 50%);
+
+    font-weight: 600;
+    transition: all 0.5s;
+  }
+  .shadow-primary:hover {
+    box-shadow: none;
+  }
 }
