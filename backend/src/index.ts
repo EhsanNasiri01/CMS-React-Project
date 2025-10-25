@@ -1,7 +1,6 @@
 import { Elysia, t } from 'elysia';
 import { swagger } from '@elysiajs/swagger';
 import { cors } from '@elysiajs/cors';
-import { rateLimit } from '@elysiajs/rate-limit';
 import { usersController } from './modules/users';
 import { productsController } from './modules/products';
 
@@ -19,29 +18,30 @@ app.use(
   })
 );
 
+
 app.use(
-  rateLimit({
-    duration: 10 * 1000, // 10 seconds
-    max: 10,
+  swagger({
+    path: '/docs',
+    documentation: {
+      info: {
+        title: 'Bun CMS Backend',
+        version: '1.0.0',
+        description: 'API documentation for the Bun, Elysia, and SQLite CMS',
+      },
+      tags: [
+        { name: 'Users', description: 'User authentication and management' },
+        { name: 'Products', description: 'Product management' }
+      ]
+    },
+    // --- ADD THIS BLOCK ---
+    // This tells the Swagger UI to send cookies with every request.
+    swaggerOptions: {
+      withCredentials: true,
+    },
+    // --------------------
   })
 );
 
-app.use(
-    swagger({
-        path: '/docs',
-        documentation: {
-            info: {
-                title: 'Bun CMS Backend',
-                version: '1.0.0',
-                description: 'API documentation for the Bun, Elysia, and SQLite CMS',
-            },
-            tags: [
-                { name: 'Users', description: 'User authentication and management' },
-                { name: 'Products', description: 'Product management' }
-            ]
-        },
-    })
-);
 // Global error handler
 app.onError(({ code, error, set }) => {
   console.error(`Error [${code}]: ${error.toString()}`);
@@ -58,6 +58,10 @@ app.onError(({ code, error, set }) => {
   return { message: 'An internal server error occurred.' };
 });
 // Group all routes under /api/v1
+app.get('/favicon.ico', ({ set }) => {
+  set.status = 204; // No Content
+  return;
+});
 app.group('/api/v1', (api) =>
     api
         .use(usersController)

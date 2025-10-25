@@ -1,13 +1,17 @@
 import { useState } from "react";
-
+import Header from "./components/Header/Header";
+import Sidebar from "./components/Sidebar/Sidebar";
+// test 1
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <>
-      <h2>hus</h2>
+      <div>
+        {/* <Sidebar></Sidebar> */}
+        <Header></Header>
+      </div>
     </>
   );
 }
-
+// test 2
+//test3
 export default App;
