@@ -1,12 +1,15 @@
-import { useState } from "react";
-import Header from "./components/Header/Header";
+import Home from "./components/Home/Home";
+import { BrowserRouter, Routes, Route } from "react-router";
 function App() {
   return (
     <>
-      <div>
-        {/* <Sidebar></Sidebar> */}
-        <Header></Header>
-      </div>
+      {" "}
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </BrowserRouter>
+      ,
     </>
   );
 }

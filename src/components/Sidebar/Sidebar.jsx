@@ -13,18 +13,21 @@ import { FiCompass, FiClock } from "react-icons/fi";
 import { LuBot } from "react-icons/lu";
 import { HiOutlineMegaphone } from "react-icons/hi2";
 import { CiChat1 } from "react-icons/ci";
+import { Link } from "react-router";
+
 const items = [
-  { id: 0, label: "Command", Icon: TbCommand },
-  { id: 1, label: "Compass", Icon: FiCompass },
-  { id: 2, label: "Bot", Icon: LuBot },
-  { id: 3, label: "Megaphone", Icon: HiOutlineMegaphone },
-  { id: 4, label: "Clock", Icon: FiClock },
+  { id: 0, label: "Command", Icon: TbCommand, to: "/command" },
+  { id: 1, label: "Compass", Icon: FiCompass, to: "/compass" },
+  { id: 2, label: "Bot", Icon: LuBot, to: "/bot" },
+  { id: 3, label: "Megaphone", Icon: HiOutlineMegaphone, to: "/megaphone" },
+  { id: 4, label: "Clock", Icon: FiClock, to: "/clock" },
 ];
 
-function SidebarItem({ active, onClick, Icon, label }) {
+function SidebarItem({ active, to, Icon, label, onClick }) {
   return (
-    <button
+    <Link
       aria-label={label}
+      to={to}
       onClick={onClick}
       className={[
         "relative grid place-items-center w-12 h-12 rounded-2xl transition-all duration-200",
@@ -46,15 +49,14 @@ function SidebarItem({ active, onClick, Icon, label }) {
           aria-hidden
         />
       )}
-    </button>
+    </Link>
   );
 }
 export default function Sidebar() {
   const [active, setActive] = useState(0);
   return (
-    <aside className="flex flex-col justify-between md:max-w-[5%] max-w-[15%] h-screen bg-dark-bg text-white px-2 z-40 ">
+    <aside className="flex flex-col justify-between md:max-w-[5%] max-w-[15%] h-screen bg-dark-bg text-white px-4 z-40 border-l-2 border-darker-bg">
       <div className="flex flex-col justify-between pt-6 pb-4 h-screen items-center w-full">
-        {" "}
         <div className="flex flex-col items-center gap-y-7 w-12 md:w-full">
           <FaBars className="text-2xl cursor-pointer" />
           {/* Divider */}
@@ -62,13 +64,14 @@ export default function Sidebar() {
           {/* Box Of Menu */}
           {/* Sidebar wrapper */}
           <aside className="bg-[#24304B] w-full py-2 px-2 rounded-[28px] flex flex-col items-center gap-4">
-            {items.map(({ id, Icon, label }) => (
+            {items.map(({ id, Icon, label, to }) => (
               <SidebarItem
                 key={id}
                 active={active === id}
                 onClick={() => setActive(id)}
                 Icon={Icon}
                 label={label}
+                to={to}
               />
             ))}
           </aside>
@@ -77,9 +80,13 @@ export default function Sidebar() {
           <section className="text-white/80 mt-2"></section>
         </div>
         <div className="px-5">
-          <div className="w-11 h-11 bg-[#24304B] flex items-center justify-center rounded-lg text-zinc-400 cursor-pointer">
+          <Link
+            to="/chat"
+            className="w-11 h-11 bg-[#24304B] flex items-center justify-center rounded-lg text-zinc-400 cursor-pointer"
+            aria-label="Chat"
+          >
             <CiChat1 className="w-5 h-5" />
-          </div>
+          </Link>
         </div>
       </div>
     </aside>
