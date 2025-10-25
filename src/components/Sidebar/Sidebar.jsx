@@ -52,16 +52,16 @@ function SidebarItem({ active, onClick, Icon, label }) {
 export default function Sidebar() {
   const [active, setActive] = useState(0);
   return (
-    <aside className="flex flex-col justify-between w-20 h-screen bg-dark-bg text-white px-2 z-40 ">
-      <div className="flex flex-col justify-between pt-6 pb-4 h-screen items-center">
+    <aside className="flex flex-col justify-between md:max-w-[5%] max-w-[15%] h-screen bg-dark-bg text-white px-2 z-40 ">
+      <div className="flex flex-col justify-between pt-6 pb-4 h-screen items-center w-full">
         {" "}
-        <div className="flex flex-col items-center  gap-y-7">
+        <div className="flex flex-col items-center gap-y-7 w-12 md:w-full">
           <FaBars className="text-2xl cursor-pointer" />
           {/* Divider */}
           <div className="w-8 h-px bg-slate-700"></div>
           {/* Box Of Menu */}
           {/* Sidebar wrapper */}
-          <aside className="bg-[#24304B] w-16 py-2 px-2 rounded-[28px] flex flex-col items-center gap-4">
+          <aside className="bg-[#24304B] w-full py-2 px-2 rounded-[28px] flex flex-col items-center gap-4">
             {items.map(({ id, Icon, label }) => (
               <SidebarItem
                 key={id}

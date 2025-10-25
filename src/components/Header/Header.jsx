@@ -10,7 +10,7 @@ export default function Header() {
         <div className="container flex items-center justify-between  bg-dark-bg">
           {/* Right side (Logo + Menu) */}
           <div className="flex items-center ">
-            <nav className="hidden md:flex  text-slate-300 gap-x-10  child:pb-1 mr-1">
+            <nav className="flex text-slate-300 gap-x-2 md:gap-x-10  child:pb-1 mr-1">
               <a
                 href="#"
                 className="hover:text-white hover:border-b-2 hover:border-b-[#00F6FF] "
