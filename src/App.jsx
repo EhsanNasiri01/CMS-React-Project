@@ -14,3 +14,10 @@ function App() {
 }
 
 export default App;
+
+// salam che khabar
+// chikara mikoni
+// az invara
+// daram bara test minevisam
+// belakhare adam bas yad begire
+// ba experience mishe yad gereft
