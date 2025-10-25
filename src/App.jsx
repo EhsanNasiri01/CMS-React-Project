@@ -1,11 +1,13 @@
 import { useState } from "react";
-
+import Header from "./components/Header/Header";
+import Sidebar from "./components/Sidebar/Sidebar";
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <>
-      <h2>hus</h2>
+      <div>
+        {/* <Sidebar></Sidebar> */}
+        <Header></Header>
+      </div>
     </>
   );
 }
