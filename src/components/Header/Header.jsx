@@ -18,7 +18,7 @@ export default function Header() {
               to="/pages"
               className="hover:text-white hover:border-b-2 hover:border-b-[#00F6FF] "
             >
-              صفحات
+              کاربران
             </Link>
             <Link
               to="/posts"

@@ -3,7 +3,7 @@ import React from "react";
 export default function Boxes() {
   return (
     // کانتینر گرید با فاصله 24px (gap-6)
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 py-6 font-Dana">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 py-6 pl-[15px] font-Dana">
       {/* باکس 1: بازدید ها */}
       <div className="flex flex-col justify-between bg-[#24304B] p-3 rounded-xl shadow-lg gap-y-5 ">
         {/* ردیف بالا: عنوان و آیکون */}
