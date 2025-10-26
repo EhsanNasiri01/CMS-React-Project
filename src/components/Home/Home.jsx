@@ -11,10 +11,10 @@ export default function Home() {
   return (
     <div className="flex h-screen bg-dark-bg">
       <Sidebar />
-      <div className="flex flex-col mr-8 w-full">
+      <div className="flex flex-col w-full">
         <Header />
         <div className="flex">
-          <div className="flex-1">
+          <div className="flex-1 pl-4  mr-8">
             <Navigator />
             <Boxes />
             <Chart />
