@@ -5,7 +5,7 @@ import Sidebar from "../Sidebar/Sidebar";
 import Boxes from "../Boxes/Boxes";
 import Chart from "../Chart/Chart";
 import LeftSidebar from "../LeftSidebar/LeftSidebar";
-
+import DonutChart from "../Chart/Donut";
 export default function Home() {
   return (
     <div className="flex h-screen bg-dark-bg">
@@ -17,6 +17,7 @@ export default function Home() {
             <Navigator />
             <Boxes />
             <Chart />
+            <DonutChart></DonutChart>
           </div>
           <LeftSidebar></LeftSidebar>
         </div>
