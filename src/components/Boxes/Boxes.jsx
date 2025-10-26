@@ -3,9 +3,9 @@ import React from "react";
 export default function Boxes() {
   return (
     // کانتینر گرید با فاصله 24px (gap-6)
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 p-6 font-Dana">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 py-6 font-Dana">
       {/* باکس 1: بازدید ها */}
-      <div className="flex flex-col justify-between bg-slate-800 p-3 rounded-xl shadow-lg gap-y-5 ">
+      <div className="flex flex-col justify-between bg-[#24304B] p-3 rounded-xl shadow-lg gap-y-5 ">
         {/* ردیف بالا: عنوان و آیکون */}
         <div className="flex justify-between items-center">
           <span className="text-sm font-medium text-slate-400">بازدید ها</span>
@@ -57,7 +57,7 @@ export default function Boxes() {
       </div>
 
       {/* باکس 2: نمایش ها */}
-      <div className="flex flex-col justify-between bg-slate-800 p-3 rounded-xl shadow-lg gap-y-5 ">
+      <div className="flex flex-col justify-between bg-[#24304B] p-3 rounded-xl shadow-lg gap-y-5 ">
         {/* ردیف بالا: عنوان و آیکون */}
         <div className="flex justify-between items-center">
           <span className="text-sm font-medium text-slate-400">نمایش ها</span>
@@ -102,7 +102,7 @@ export default function Boxes() {
       </div>
 
       {/* باکس 3: کاربران جدید */}
-      <div className="flex flex-col justify-between bg-slate-800 p-3 rounded-xl shadow-lg gap-y-5 ">
+      <div className="flex flex-col justify-between bg-[#24304B] p-3 rounded-xl shadow-lg gap-y-5 ">
         {/* ردیف بالا: عنوان و آیکون */}
         <div className="flex justify-between items-center">
           <span className="text-sm font-medium text-slate-400">
@@ -149,7 +149,7 @@ export default function Boxes() {
       </div>
 
       {/* باکس 4: کاربران فعال */}
-      <div className="flex flex-col justify-between bg-slate-800 p-3 rounded-xl shadow-lg  gap-y-5">
+      <div className="flex flex-col justify-between bg-[#24304B] p-3 rounded-xl shadow-lg  gap-y-5">
         {/* ردیف بالا: عنوان و آیکون */}
         <div className="flex justify-between items-center">
           <span className="text-sm font-medium text-slate-400">

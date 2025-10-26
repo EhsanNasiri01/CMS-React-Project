@@ -3,7 +3,7 @@ import { FaChevronLeft } from "react-icons/fa";
 
 export default function Boxes() {
   return (
-    <div className="mt-6 mr-8 text-white ">
+    <div className="mt-6 text-white ">
       {/* Navigator */}
       <div className="flex gap-x-2.5 items-center">
         <a href="" className="text-cyan-600">

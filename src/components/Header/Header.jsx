@@ -3,7 +3,7 @@ import { FaBell, FaSearch, FaUserCircle } from "react-icons/fa";
 import { Link } from "react-router";
 export default function Header() {
   return (
-    <header className="w-full bg-dark-bg text-white px-6 py-[26px] max-h-20">
+    <header className="w-full bg-dark-bg text-white px-6 py-[26px] max-h-20 border-b-2 border-b-darker-bg">
       <div className="container flex items-center justify-between  bg-dark-bg">
         {/* Right side (Logo + Menu) */}
         <div className="flex items-center ">
