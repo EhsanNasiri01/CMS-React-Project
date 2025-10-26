@@ -21,7 +21,6 @@ const items = [
   { id: 1, label: "کاربران", Icon: FaRegUser, to: "/users" },
   { id: 2, label: "ارتباط با ما", Icon: CiChat1, to: "/about" },
   { id: 3, label: "تماس با ما", Icon: HiOutlineMegaphone, to: "/contact" },
-  { id: 4, label: "ثبت نام", Icon: FaRegCalendar, to: "/register" },
 ];
 
 // حذف سبز/سبز فیروزه‌ای و جایگزینی رنگ‌بندی اولیه با آبی و طیف قبلی
