@@ -99,15 +99,17 @@ const columns = [
           display: "flex",
           gap: 8,
           justifyContent: "center",
+          alignItems: "center", // Bring buttons to center vertically
           width: "100%",
+          height: "100%",
         }}
       >
         <IconButton
           size="small"
           sx={{
-            backgroundColor: "#6376ba",
+            backgroundColor: "#384A71",
             color: "#fff",
-            "&:hover": { backgroundColor: "#6376ba" },
+            "&:hover": { backgroundColor: "#2c3752" },
             px: 1.5,
             py: 0.5,
             borderRadius: 1,
@@ -190,7 +192,13 @@ export default function UsersTable() {
   const theme = createTheme(
     {
       direction: "rtl",
-      palette: { mode: "dark" },
+      palette: {
+        mode: "dark",
+        background: {
+          default: "#131B2F", // Table background
+          paper: "#131B2F",
+        },
+      },
       typography: {
         fontFamily: [
           "IRANSans",
@@ -217,22 +225,43 @@ export default function UsersTable() {
           checkboxSelection // برای فعال‌سازی چک‌باکس کنار هر کاربر
           sx={{
             direction: "rtl",
+            bgcolor: "#131B2F", // Table main background changed
             "& .MuiDataGrid-footerContainer": { justifyContent: "flex-end" },
             "& .MuiDataGrid-cell": {
               justifyContent: "flex-end",
               textAlign: "right",
               paddingRight: "0.5rem",
+              bgcolor: "#131B2F", // Changed
             },
             "& .MuiDataGrid-columnHeader": {
               textAlign: "right",
               justifyContent: "flex-end",
+              bgcolor: "#24304B", // Header background color changed
+              color: "#fff",
             },
             // چک‌باکس و هدر را راست‌چین کند
             "& .MuiDataGrid-columnHeaderCheckbox, & .MuiDataGrid-cellCheckbox":
               {
                 justifyContent: "flex-end",
                 flexDirection: "row-reverse",
+                bgcolor: "#24304B", // Changed
               },
+            // چک‌باکس سل چه بکگراندش برای هر سطر
+            "& .MuiDataGrid-cellCheckbox": {
+              backgroundColor: "#131B2F",
+            },
+            "& .MuiDataGrid-row": {
+              bgcolor: "#131B2F", // Changed
+            },
+            "& .MuiDataGrid-row.Mui-selected": {
+              backgroundColor: "#26314d !important", // Slightly different for selected row
+            },
+            "& .MuiDataGrid-virtualScroller": {
+              bgcolor: "#131B2F", // Changed
+            },
+            "& .MuiCheckbox-root": {
+              color: "#fff",
+            },
           }}
           localeText={faIR.components.MuiDataGrid.defaultProps.localeText}
         />
