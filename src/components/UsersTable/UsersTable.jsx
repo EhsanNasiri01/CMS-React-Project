@@ -212,60 +212,105 @@ export default function UsersTable() {
     faIR
   );
 
+  // محاسبه ارتفاع ثابت متناسب با تعداد ردیف‌ها برای جلوگیری از ردیف خالی اضافه
+  const rowHeight = 52; // مقدار پیش‌فرض MUI DataGrid برای density="standard"
+  const headerHeight = 56;
+  const footerHeight = 56;
+  // تعداد ردیف‌های قابل نمایش هر صفحه
+  const pageSize = 5;
+  // تعداد ردیف‌هایی که واقعاً تو اون صفحه هست (اولین صفحه: 5 ـ ردیف. اگر کمتر بود همون تعداد واقعیاً موجود)
+  // ما rows رو همونطور که هست داریم
+  // علت ردیف خالی اینه که height با تعداد ردیف‌ها نمی‌خونه
+  // پس ارتفاع را داینامیک کنیم
+  // در DataGrid نسخه‌های جدید اگر height کمتر از مجموع ردیف+هدر+فوتر باشه، اسکرول نشون میده اما با تعداد پایین مشکلی نیست
+
+  // صفحه فعلی pagination (عدد ۰ بیس)
+  const [paginationModel, setPaginationModel] = React.useState({
+    page: 0,
+    pageSize: pageSize,
+  });
+
+  // پیدا کن در صفحه فعلی چند ردیف نمایش داده خواهد شد:
+  const firstRowIndex = paginationModel.page * paginationModel.pageSize;
+  const lastRowIndex = Math.min(
+    firstRowIndex + paginationModel.pageSize,
+    rows.length
+  );
+  const visibleRowsCount = lastRowIndex - firstRowIndex;
+
+  // اگر ردیف کمتر از pageSize بود، ارتفاع را کاهش بده تا ردیف اضافه نیاد
+  const calculatedHeight =
+    headerHeight +
+    (visibleRowsCount > 0 ? visibleRowsCount * rowHeight : rowHeight) +
+    footerHeight;
+
   return (
-    <ThemeProvider theme={theme}>
-      <Box sx={{ height: 420, width: "100%", direction: "rtl" }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 5 } },
-          }}
-          pageSizeOptions={[5]}
-          checkboxSelection // برای فعال‌سازی چک‌باکس کنار هر کاربر
+    <div className="mt-5 p-5">
+      {" "}
+      <ThemeProvider theme={theme}>
+        <Box
           sx={{
+            // height را بر اساس تعداد واقعی ردیف تنظیم کن
+            height: calculatedHeight,
+            width: "100%",
             direction: "rtl",
-            bgcolor: "#131B2F", // Table main background changed
-            "& .MuiDataGrid-footerContainer": { justifyContent: "flex-end" },
-            "& .MuiDataGrid-cell": {
-              justifyContent: "flex-end",
-              textAlign: "right",
-              paddingRight: "0.5rem",
-              bgcolor: "#131B2F", // Changed
-            },
-            "& .MuiDataGrid-columnHeader": {
-              textAlign: "right",
-              justifyContent: "flex-end",
-              bgcolor: "#24304B", // Header background color changed
-              color: "#fff",
-            },
-            // چک‌باکس و هدر را راست‌چین کند
-            "& .MuiDataGrid-columnHeaderCheckbox, & .MuiDataGrid-cellCheckbox":
-              {
-                justifyContent: "flex-end",
-                flexDirection: "row-reverse",
-                bgcolor: "#24304B", // Changed
-              },
-            // چک‌باکس سل چه بکگراندش برای هر سطر
-            "& .MuiDataGrid-cellCheckbox": {
-              backgroundColor: "#131B2F",
-            },
-            "& .MuiDataGrid-row": {
-              bgcolor: "#131B2F", // Changed
-            },
-            "& .MuiDataGrid-row.Mui-selected": {
-              backgroundColor: "#26314d !important", // Slightly different for selected row
-            },
-            "& .MuiDataGrid-virtualScroller": {
-              bgcolor: "#131B2F", // Changed
-            },
-            "& .MuiCheckbox-root": {
-              color: "#fff",
-            },
           }}
-          localeText={faIR.components.MuiDataGrid.defaultProps.localeText}
-        />
-      </Box>
-    </ThemeProvider>
+        >
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            initialState={{
+              pagination: { paginationModel: { pageSize: pageSize } },
+            }}
+            pageSizeOptions={[pageSize]}
+            paginationModel={paginationModel}
+            onPaginationModelChange={setPaginationModel}
+            checkboxSelection // برای فعال‌سازی چک‌باکس کنار هر کاربر
+            // از autoHeight استفاده نکن، ارتفاع را بالا کنترل کردیم
+            sx={{
+              direction: "rtl",
+              bgcolor: "#131B2F", // Table main background changed
+              "& .MuiDataGrid-footerContainer": { justifyContent: "flex-end" },
+              "& .MuiDataGrid-cell": {
+                justifyContent: "flex-end",
+                textAlign: "right",
+                paddingRight: "0.5rem",
+                bgcolor: "#131B2F", // Changed
+              },
+              "& .MuiDataGrid-columnHeader": {
+                textAlign: "right",
+                justifyContent: "flex-end",
+                bgcolor: "#24304B", // Header background color changed
+                color: "#fff",
+              },
+              // چک‌باکس و هدر را راست‌چین کند
+              "& .MuiDataGrid-columnHeaderCheckbox, & .MuiDataGrid-cellCheckbox":
+                {
+                  justifyContent: "flex-end",
+                  flexDirection: "row-reverse",
+                  bgcolor: "#24304B", // Changed
+                },
+              // چک‌باکس سل چه بکگراندش برای هر سطر
+              "& .MuiDataGrid-cellCheckbox": {
+                backgroundColor: "#131B2F",
+              },
+              "& .MuiDataGrid-row": {
+                bgcolor: "#131B2F", // Changed
+              },
+              "& .MuiDataGrid-row.Mui-selected": {
+                backgroundColor: "#26314d !important", // Slightly different for selected row
+              },
+              "& .MuiDataGrid-virtualScroller": {
+                bgcolor: "#131B2F", // Changed
+              },
+              "& .MuiCheckbox-root": {
+                color: "#fff",
+              },
+            }}
+            localeText={faIR.components.MuiDataGrid.defaultProps.localeText}
+          />
+        </Box>
+      </ThemeProvider>
+    </div>
   );
 }
