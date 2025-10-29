@@ -4,7 +4,7 @@ import { Link } from "react-router";
 
 const menuItems = [
   { label: "داشبورد", to: "/" },
-  { label: "کاربران", to: "/pages" },
+  { label: "کاربران", to: "/users" },
   { label: "پست ها", to: "/posts" },
 ];
 
