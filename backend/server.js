@@ -5,7 +5,7 @@ import { authRoutes } from './routes/auth.js';
 import { dashboardRoutes } from './routes/dashboard.js';
 import session from 'express-session';
 import path from 'path';
-import process from 'process'; 
+import process from 'process';
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

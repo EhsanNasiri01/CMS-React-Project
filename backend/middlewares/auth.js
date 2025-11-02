@@ -1,7 +1,7 @@
-export function isLoggedIn(req, res, next) {
-    if (req.session && req.session.user) {
+export function isAdmin(req, res, next) {
+    if (req.session && req.session.user && req.session.user.role=='admin') {
         next();
     } else {
-        return res.send('only users can use it')
+        return res.send('only admins can use it')
     }
 }

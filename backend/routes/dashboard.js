@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { isLoggedIn } from "../middlewares/auth.js";
+import { isAdmin } from "../middlewares/auth.js";
 import {
     getDashboard,
     getProductList,
@@ -7,14 +7,26 @@ import {
     createProduct,
     editProduct,
     deleteProduct,
-} from "../conrtollers/dashboard.js";
+    getUserList,
+    getUserDetails,
+    // createUser,
+    editUser,
+    deleteUser
+} from "../controllers/dashboard.js";
 const router = Router();
 export function dashboardRoutes() {
     router.get('/', getDashboard);
-    router.get('/products',isLoggedIn, getProductList);
-    router.get('/productDetails',isLoggedIn, getProductDetails);
-    router.post('/product',isLoggedIn,createProduct);
-    router.put('/product/:productID',isLoggedIn,editProduct);
-    router.delete('/product/:productID',isLoggedIn,deleteProduct);
+    //product
+    router.get('/products',isAdmin, getProductList);
+    router.get('/productDetails',isAdmin, getProductDetails);
+    router.post('/product',isAdmin,createProduct);
+    router.put('/product/:productID',isAdmin,editProduct);
+    router.delete('/product/:productID',isAdmin,deleteProduct);
+    //user
+    router.get('/users',isAdmin,getUserList);
+    router.get('/userDetails',isAdmin,getUserDetails);
+    // router.post('/user',isAdmin,createUser);
+    router.put('/user/:userID',isAdmin,editUser);
+    router.delete('/user/:userID',isAdmin,deleteUser);
     return router;
 };
