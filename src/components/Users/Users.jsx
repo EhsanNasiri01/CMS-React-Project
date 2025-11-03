@@ -5,7 +5,7 @@ import Sidebar from "../Sidebar/Sidebar";
 import LeftSidebar from "../LeftSidebar/LeftSidebar";
 import UsersTable from "../UsersTable/UsersTable";
 
-export default function Home() {
+export default function Users() {
   return (
     <div className="flex h-screen bg-dark-bg overflow-hidden">
       <Sidebar />
