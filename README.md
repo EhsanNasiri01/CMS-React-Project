@@ -126,10 +126,10 @@ my-app/
 این پروژه تحت مجوز MIT منتشر می‌شود. برای اطلاعات بیشتر فایل `LICENSE` (در صورت وجود) را ببینید.
 
 ## اسکرین‌شات/دمو
-
-![داشبورد](public/screenshots/main.png)
-![جدول کاربران](public/screenshots/users.png).
-
----
+<img src="public/screenshots/main.png" alt="داشبورد" width="800" />
+<img src="public/screenshots/users.png" alt="داشبورد" width="800" />
+<img src="public/screenshots/adduser.png" alt="داشبورد" width="800" />
+<img src="public/screenshots/deluser.png" alt="داشبورد" width="800" />
+<img src="public/screenshots/edituser.png" alt="داشبورد" width="800" />
 
 اگر سوالی داشتید یا به راهنمایی نیاز دارید، یک Issue باز کنید یا پیام بگذارید. موفق باشید! 🚀
