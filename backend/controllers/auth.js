@@ -26,14 +26,16 @@ export async function register(req,res){
         const user = await User.findOne({email:email});
         if (user) return res.send('a user with this email exist');
         const hashedPass = await bcrypt.hash(password,10);
+        const userID = String(Math.random()*700000000);
         const newUser = new User({
             email:email, //الزامی
             password:hashedPass, //الزامی
             name:name, //الزامی
-            role:role // نقش فقط دو مقدار admin و user است. الزامی
+            role:role, // نقش فقط دو مقدار admin و user است. الزامی
+            userID:userID
         });
         await newUser.save();
-        let userSession = {email:email, name:name, role:role};
+        let userSession = {email:email, name:name, role:role, userID:userID};
         req.session.user = userSession;
         switch (role) {
             case 'admin':
@@ -60,7 +62,7 @@ export async function login(req,res){
         const hashedPass = user.password;
         const isMatch = await bcrypt.compare(password,hashedPass);
         if (!isMatch) return res.send('incorrect info');
-        let userSession = {email:email, name:user.name, role:user.role};
+        let userSession = {email:email, name:user.name, role:user.role, userID:user.userID};
         req.session.user = userSession;
         res.redirect('/dashboard');
     } catch (error) {

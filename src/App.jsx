@@ -1,11 +1,10 @@
-import { useState } from "react";
-
+import  Register  from './pages/register.jsx'
 function App() {
-  const [count, setCount] = useState(0);
 
   return (
     <>
       <h2>hus</h2>
+      <Register />
     </>
   );
 }
