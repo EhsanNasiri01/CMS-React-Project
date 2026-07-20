@@ -1,199 +1,154 @@
-import React from "react";
+import {
+  LuEye,
+  LuMousePointerClick,
+  LuTrendingDown,
+  LuTrendingUp,
+  LuUserPlus,
+  LuUsers,
+} from "react-icons/lu";
+import { useI18n } from "../../i18n/useI18n";
+
+const METRICS = [
+  {
+    key: "metric.pageViews",
+    value: 121168658,
+    delta: 11.01,
+    Icon: LuEye,
+    tone: "text-info",
+    spark: [38, 42, 36, 48, 55, 51, 62, 58, 71],
+  },
+  {
+    key: "metric.impressions",
+    value: 728564,
+    delta: 25,
+    Icon: LuMousePointerClick,
+    tone: "text-accent",
+    spark: [22, 30, 28, 41, 39, 52, 49, 63, 74],
+  },
+  {
+    key: "metric.newUsers",
+    value: 1457,
+    delta: -4.2,
+    Icon: LuUserPlus,
+    tone: "text-warning",
+    spark: [64, 61, 66, 58, 55, 59, 48, 45, 43],
+  },
+  {
+    key: "metric.activeUsers",
+    value: 5653,
+    delta: 16,
+    Icon: LuUsers,
+    tone: "text-success",
+    spark: [30, 34, 33, 44, 47, 45, 56, 60, 68],
+  },
+];
+
+/** Nine points, normalised to a 100×32 box, rendered as a smooth polyline. */
+function Sparkline({ points, positive }) {
+  const max = Math.max(...points);
+  const min = Math.min(...points);
+  const range = max - min || 1;
+  const d = points
+    .map((p, i) => {
+      const x = (i / (points.length - 1)) * 100;
+      const y = 30 - ((p - min) / range) * 26;
+      return `${i === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`;
+    })
+    .join(" ");
+
+  return (
+    <svg
+      viewBox="0 0 100 32"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+      className="h-8 w-full"
+    >
+      <path
+        d={`${d} L100 32 L0 32 Z`}
+        fill={positive ? "rgba(45,226,197,0.10)" : "rgba(245,85,109,0.10)"}
+      />
+      <path
+        d={d}
+        fill="none"
+        stroke={positive ? "#2DE2C5" : "#F5556D"}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  );
+}
 
 export default function Boxes() {
+  const { t, formatNumber } = useI18n();
+
   return (
-    // کانتینر گرید با فاصله 24px (gap-6)
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 py-6 pl-[15px] font-Dana">
-      {/* باکس 1: بازدید ها */}
-      <div className="flex flex-col justify-between bg-[#24304B] p-3 rounded-xl shadow-lg gap-y-5 ">
-        {/* ردیف بالا: عنوان و آیکون */}
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-medium text-slate-400">بازدید ها</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="1.5"
-            stroke="currentColor"
-            className="w-6 h-6 text-yellow-500"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 10.224 6.365 7.5 12 7.5c5.635 0 8.573 2.724 9.964 4.183.37.361.37.958 0 1.319C20.577 14.776 17.635 17.5 12 17.5c-5.635 0-8.573-2.724-9.964-4.183z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
-        </div>
-        {/* ردیف پایین: عدد و درصد (تراز شده از پایین) */}
-        <div className="flex justify-between items-baseline">
-          <div>
-            <span className="text-3xl font-semibold text-white">
-              121,168,658
-            </span>
-          </div>
-          <div className="flex items-center text-sm font-medium text-green-500">
-            <span>+11.01%</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-4 h-4 ml-1"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
+    <section
+      aria-label={t("page.dashboard.title")}
+      className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+    >
+      {METRICS.map(({ key, value, delta, Icon, tone, spark }, i) => {
+        const positive = delta >= 0;
+        const DeltaIcon = positive ? LuTrendingUp : LuTrendingDown;
 
-      {/* باکس 2: نمایش ها */}
-      <div className="flex flex-col justify-between bg-[#24304B] p-3 rounded-xl shadow-lg gap-y-5 ">
-        {/* ردیف بالا: عنوان و آیکون */}
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-medium text-slate-400">نمایش ها</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="1.5"
-            stroke="currentColor"
-            className="w-6 h-6 text-purple-500"
+        return (
+          <article
+            key={key}
+            style={{ animationDelay: `${i * 60}ms` }}
+            className="surface-card surface-card-hover animate-fade-up group overflow-hidden p-5"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75v4.5m0-4.5h-4.5m4.5 0L15 9M20.25 20.25v-4.5m0 4.5h-4.5m4.5 0L15 15"
-            />
-          </svg>
-        </div>
-        {/* ردیف پایین: عدد و درصد (تراز شده از پایین) */}
-        <div className="flex justify-between items-baseline">
-          <div>
-            <span className="text-3xl font-semibold text-white">728,564</span>
-          </div>
-          <div className="flex items-center text-sm font-medium text-green-500">
-            <span>+25%</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-4 h-4 ml-1"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"
+            <div className="flex items-start justify-between gap-3">
+              <h3 className="eyebrow">{t(key)}</h3>
+              <Icon
+                aria-hidden="true"
+                className={`size-[18px] shrink-0 ${tone}`}
+                strokeWidth={1.75}
               />
-            </svg>
-          </div>
-        </div>
-      </div>
+            </div>
 
-      {/* باکس 3: کاربران جدید */}
-      <div className="flex flex-col justify-between bg-[#24304B] p-3 rounded-xl shadow-lg gap-y-5 ">
-        {/* ردیف بالا: عنوان و آیکون */}
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-medium text-slate-400">
-            کاربران جدید
-          </span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="1.5"
-            stroke="currentColor"
-            className="w-6 h-6 text-red-500"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.5 21.75c-2.673 0-5.18-.932-7.14-2.515z"
-            />
-          </svg>
-        </div>
-        {/* ردیف پایین: عدد و درصد (تراز شده از پایین) */}
-        <div className="flex justify-between items-baseline">
-          <div>
-            <span className="text-3xl font-semibold text-white">1,457</span>
-          </div>
-          <div className="flex items-center text-sm font-medium text-green-500">
-            <span>+5%</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-4 h-4 ml-1"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
+            <p className="tabular mt-4 text-[28px] font-semibold leading-none tracking-[-0.02em]">
+              {formatNumber(value)}
+            </p>
 
-      {/* باکس 4: کاربران فعال */}
-      <div className="flex flex-col justify-between bg-[#24304B] p-3 rounded-xl shadow-lg  gap-y-5">
-        {/* ردیف بالا: عنوان و آیکون */}
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-medium text-slate-400">
-            کاربران فعال
-          </span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="1.5"
-            stroke="currentColor"
-            className="w-6 h-6 text-green-500"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
-            />
-          </svg>
-        </div>
-        {/* ردیف پایین: عدد و درصد (تراز شده از پایین) */}
-        <div className="flex justify-between items-baseline">
-          <div>
-            <span className="text-3xl font-semibold text-white">5,653</span>
-          </div>
-          <div className="flex items-center text-sm font-medium text-green-500">
-            <span>+16%</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-4 h-4 ml-1"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
-    </div>
+            <div className="mt-4 flex items-end justify-between gap-4">
+              <div className="min-w-0">
+                <span
+                  className={[
+                    "inline-flex items-center gap-1 text-[13px] font-medium",
+                    positive ? "text-success" : "text-danger",
+                  ].join(" ")}
+                >
+                  <DeltaIcon
+                    aria-hidden="true"
+                    className="size-3.5"
+                    strokeWidth={2.25}
+                  />
+                  <span className="tabular">
+                    {positive ? "+" : "−"}
+                    {formatNumber(Math.abs(delta), {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 2,
+                    })}
+                    %
+                  </span>
+                  {/* Direction is stated in text too, never colour alone */}
+                  <span className="sr-only">
+                    {positive ? t("metric.up") : t("metric.down")}
+                  </span>
+                </span>
+                <p className="mt-0.5 truncate text-[11px] text-fg-subtle">
+                  {t("metric.vsLastWeek")}
+                </p>
+              </div>
+
+              <div className="w-24 shrink-0 opacity-70 transition-opacity duration-300 group-hover:opacity-100">
+                <Sparkline points={spark} positive={positive} />
+              </div>
+            </div>
+          </article>
+        );
+      })}
+    </section>
   );
 }

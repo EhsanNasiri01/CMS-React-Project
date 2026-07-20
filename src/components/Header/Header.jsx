@@ -1,80 +1,79 @@
-import React from "react";
-import { FaBell, FaSearch, FaUserCircle } from "react-icons/fa";
-import { Link } from "react-router";
+import { LuBell, LuMenu, LuSearch } from "react-icons/lu";
+import { useI18n } from "../../i18n/useI18n";
+import LanguageTabs from "../ui/LanguageTabs";
 
-const menuItems = [
-  { label: "داشبورد", to: "/" },
-  { label: "کاربران", to: "/users" },
-  { label: "پست ها", to: "/posts" },
-];
+const UNREAD = 3;
 
-export default function Header() {
+export default function Header({ onOpenNav }) {
+  const { t } = useI18n();
+
   return (
-    <header className="w-full bg-dark-bg text-white px-6 py-[26px] max-h-20 border-b-2 border-b-darker-bg">
-      <div className="container flex items-center justify-between w-full bg-dark-bg">
-        {/* Right side (Logo + Menu) */}
-        <div className="flex items-center">
-          <nav className="flex gap-x-4 md:gap-x-10 mr-1">
-            {menuItems.map((item, idx) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`
-                  group relative overflow-visible transition-colors duration-300 px-2 pb-1
-                  text-slate-300
-                  `}
-              >
-                <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
-                  {item.label}
-                </span>
-                {/* Animated Underline */}
-                <span
-                  className={`
-                    absolute left-0 right-0 bottom-0 h-[2.5px] rounded-md
-                    bg-gradient-to-r from-[#2cdfff] via-[#00F6FF] to-[#74fdff]
-                    scale-x-0 group-hover:scale-x-100
-                    transition-transform duration-300 origin-[50%_100%]
-                    pointer-events-none
-                  `}
-                  style={{ zIndex: 1 }}
-                />
-              </Link>
-            ))}
-          </nav>
-          {/* Divider */}
-          <div className="h-8 w-px bg-slate-700 mr-10"></div>
-          {/* Center (Search Bar) */}
-          <div className="hidden md:flex mr-10 cursor-pointer group items-center transition-all duration-300">
-            <FaSearch className="text-slate-400 mr-2 text-lg group-hover:text-[#00F6FF] transition-colors duration-300" />
-            {/* Animated search input on hover */}
-            <input
-              type="text"
-              placeholder="جستجو..."
-              className="
-                w-0 opacity-0 group-hover:w-32 group-hover:opacity-100 ml-2 transition-all duration-300
-                bg-[#202b44] text-slate-200 px-3 py-1 rounded-md outline-none
-                text-[13px] placeholder-slate-400 border border-slate-700
-              "
-            />
-          </div>
-        </div>
-        {/* Left side (Icons & User) */}
-        <div className="flex items-center gap-x-6">
-          <div className="flex items-center gap-x-2 cursor-pointer group">
-            <FaUserCircle
-              size={28}
-              className="text-blue-400 group-hover:scale-110 transition-transform duration-300"
-            />
-            <span className="hidden md:inline text-sm font-medium transition-colors duration-300 group-hover:text-[#00F6FF]">
-              طراح سایت
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-line bg-surface/85 px-4 backdrop-blur-xl md:px-6">
+      {/* Mobile drawer trigger */}
+      <button
+        type="button"
+        onClick={onOpenNav}
+        aria-label={t("header.openMenu")}
+        className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-lg text-fg-muted transition-colors hover:bg-panel hover:text-fg lg:hidden"
+      >
+        <LuMenu className="size-5" strokeWidth={1.75} />
+      </button>
+
+      {/* Search */}
+      <div className="relative min-w-0 flex-1 md:max-w-md">
+        <LuSearch
+          aria-hidden="true"
+          className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-fg-subtle"
+          strokeWidth={1.75}
+        />
+        <input
+          type="search"
+          aria-label={t("header.searchShort")}
+          placeholder={t("header.search")}
+          className="h-11 w-full rounded-lg border border-line bg-canvas ps-10 pe-3 text-sm text-fg
+                     placeholder:text-fg-subtle
+                     transition-[border-color,box-shadow] duration-200
+                     focus:border-accent focus:outline-none focus:ring-[3px] focus:ring-accent/15"
+        />
+      </div>
+
+      <div className="ms-auto flex items-center gap-2 md:gap-3">
+        <LanguageTabs />
+
+        <button
+          type="button"
+          aria-label={`${t("header.notifications")} — ${t("header.unread", {
+            n: UNREAD,
+          })}`}
+          className="relative grid size-11 cursor-pointer place-items-center rounded-lg text-fg-muted transition-colors hover:bg-panel hover:text-fg"
+        >
+          <LuBell className="size-5" strokeWidth={1.75} />
+          {UNREAD > 0 && (
+            <span className="absolute end-2 top-2 grid size-4 place-items-center rounded-full bg-danger font-mono text-[9px] font-semibold text-white ring-2 ring-surface">
+              {UNREAD}
             </span>
-          </div>
-          <div className="relative">
-            <FaBell className="text-slate-400 hover:text-[#00F6FF] cursor-pointer w-5 h-5 transition-colors duration-300" />
-            {/* Example animated notification dot */}
-            <span className="absolute top-[-4px] right-[-4px] w-2 h-2 bg-[#00F6FF] rounded-full animate-pulse shadow-lg border-2 border-dark-bg"></span>
-          </div>
-        </div>
+          )}
+        </button>
+
+        <div className="hidden h-8 w-px bg-line sm:block" />
+
+        <button
+          type="button"
+          className="flex h-11 cursor-pointer items-center gap-2.5 rounded-lg px-2 transition-colors hover:bg-panel"
+        >
+          <span
+            aria-hidden="true"
+            className="grid size-8 shrink-0 place-items-center rounded-full bg-elevated font-mono text-xs font-semibold text-fg ring-1 ring-line-strong"
+          >
+            EN
+          </span>
+          <span className="hidden text-start leading-tight sm:block">
+            <span className="block text-sm font-medium">Ehsan Nasiri</span>
+            <span className="block text-[11px] text-fg-subtle">
+              {t("header.role")}
+            </span>
+          </span>
+        </button>
       </div>
     </header>
   );

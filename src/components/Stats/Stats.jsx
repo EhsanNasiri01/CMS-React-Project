@@ -1,64 +1,59 @@
-import React from "react";
-import DonutChart from "../Chart/Donut";
+import { useI18n } from "../../i18n/useI18n";
+import Panel from "../ui/Panel";
+
+const ONLINE = 179;
+const OFFLINE = 394;
+const TOTAL = ONLINE + OFFLINE;
+
 export default function Stats() {
+  const { t, formatNumber } = useI18n();
+  const onlineShare = (ONLINE / TOTAL) * 100;
+
   return (
-    <section className="mt-4">
-      <div className="flex  justify-between">
-        {" "}
-        <DonutChart></DonutChart>
-        <div className="w-[486px]">
-          <div className="max-w-md w-full bg-[#131B2F] rounded-lg">
-            <div className="flex items-center gap-x-2 mb-12">
-              <h2 className="text-lg font-medium text-white">میزان فعالیت</h2>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                className="w-5 h-5 text-gray-400"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"
-                />
-              </svg>
-            </div>
-
-            <div className="flex mb-3 gap-x-2 items-center">
-              <span className="text-4xl font-bold text-white">594</span>
-              <span className="ml-2 text-lg text-gray-400">مجموع</span>
-            </div>
-
-            <div className="w-full bg-[#3F4E6B] rounded-full h-2.5 mb-6">
-              <div className="bg-[#00C4FF] h-2.5 rounded-full w-[30%]"></div>
-            </div>
-
-            <div className="grid grid-cols-2 justify-between items-center text-sm gap-x-4">
-              <div className="flex flex-col gap-y-2">
-                <div className="flex items-center gap-x-2 text-gray-400">
-                  <span className="w-4 h-1 bg-[#00C4FF] rounded-full"></span>
-                  <span>آنلاین</span>
-                </div>
-                <span className="text-lg font-semibold text-white">
-                  179 کاربر
-                </span>
-              </div>
-
-              <div className="flex flex-col gap-y-2">
-                <div className="flex items-center gap-x-2 text-gray-400">
-                  <span className="w-4 h-1 bg-[#3F4E6B] rounded-full"></span>
-                  <span>آفلاین</span>
-                </div>
-                <span className="text-lg font-semibold text-white">
-                  394 کاربر
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+    <Panel title={t("chart.activity")} hint={t("chart.activityHint")}>
+      <div className="flex items-baseline gap-2">
+        <span className="tabular text-[38px] font-semibold leading-none tracking-[-0.02em]">
+          {formatNumber(TOTAL)}
+        </span>
+        <span className="text-sm text-fg-muted">{t("chart.total")}</span>
       </div>
-    </section>
+
+      {/* Split bar: proportion is visible, exact counts are in the key below */}
+      <div
+        role="img"
+        aria-label={`${t("chart.online")}: ${formatNumber(
+          ONLINE
+        )} — ${t("chart.offline")}: ${formatNumber(OFFLINE)}`}
+        className="mt-5 flex h-2 overflow-hidden rounded-full bg-elevated"
+      >
+        <div
+          className="h-full rounded-full bg-accent transition-[width] duration-500 ease-out"
+          style={{ width: `${onlineShare}%` }}
+        />
+      </div>
+
+      <dl className="mt-6 grid grid-cols-2 gap-4">
+        {[
+          { label: t("chart.online"), value: ONLINE, color: "bg-accent" },
+          { label: t("chart.offline"), value: OFFLINE, color: "bg-elevated" },
+        ].map((item) => (
+          <div key={item.label}>
+            <dt className="flex items-center gap-2 text-xs text-fg-muted">
+              <span
+                aria-hidden="true"
+                className={`h-1 w-4 rounded-full ${item.color}`}
+              />
+              {item.label}
+            </dt>
+            <dd className="tabular mt-1.5 text-lg font-semibold">
+              {formatNumber(item.value)}{" "}
+              <span className="text-xs font-normal text-fg-subtle">
+                {t("chart.usersUnit")}
+              </span>
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </Panel>
   );
 }

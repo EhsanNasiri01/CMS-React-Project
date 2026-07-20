@@ -1,532 +1,529 @@
-import * as React from "react";
-import { useState } from "react";
-
-import Box from "@mui/material/Box";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
+import { enUS, faIR } from "@mui/x-data-grid/locales";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { faIR } from "@mui/x-data-grid/locales";
-import { IconButton } from "@mui/material";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import Box from "@mui/material/Box";
 import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
+import {
+  LuCircleAlert,
+  LuInbox,
+  LuPencil,
+  LuPlus,
+  LuRefreshCw,
+  LuSearch,
+  LuTrash2,
+} from "react-icons/lu";
+import { useI18n } from "../../i18n/useI18n";
 
 const firebaseURL =
   "https://cms-dashboard-23daf-default-rtdb.firebaseio.com/users";
 
-// سبک دارک برای SweetAlert2 Modal و input
-const darkSwalStyle = `
-.swal2-popup {
-  background: #071026 !important;
-  color: #fff !important;
-  border-radius: 12px !important;
-  box-shadow: 0 5px 20px #11182744 !important;
-}
-.swal2-title,
-.swal2-html-container {
-  color: #fff !important;
-  font-family: IRANSans, Vazirmatn, Tahoma, Segoe UI, sans-serif !important;
-}
-.swal2-input, .swal2-textarea {
-  background: #131B2F !important;
-  color: #fff !important;
-  border: 1px solid #24304B !important;
-  box-shadow: none !important;
-}
-.swal2-input::placeholder,
-.swal2-textarea::placeholder {
-  color: #bfc6e0 !important;
-  opacity: 1 !important;
-}
-.swal2-confirm {
-  background: #384A71 !important;
-  color: #fff !important;
-  border: none !important;
-  border-radius: 6px !important;
-  font-family: IRANSans, Vazirmatn, Tahoma, Segoe UI, sans-serif !important;
-}
-.swal2-cancel {
-  background: #232947 !important;
-  color: #fff !important;
-  border: 1px solid #414a74 !important;
-  border-radius: 6px !important;
-  font-family: IRANSans, Vazirmatn, Tahoma, Segoe UI, sans-serif !important;
-}
-.swal2-actions {
-  gap: 0.7rem !important;
-}
-.swal2-icon {
-  color: #F06292 !important;
-  border-color: #F06292 !important;
-}
-`;
+const PAGE_SIZE = 8;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export default function UsersTable() {
-  const [rows, setRows] = React.useState([]);
-  const [loading, setLoading] = useState(false);
+/* ── SweetAlert helpers ───────────────────────────────────────────────────
+   The modal markup is raw HTML (SweetAlert's API), but every field gets a
+   real <label>, a 44px input and its own inline error slot. Styling lives in
+   index.css under the .swal2-field rules.                                   */
 
-  // اضافه کردن style دارک تم SweetAlert2 فقط یک بار
-  React.useEffect(() => {
-    if (!document.getElementById("dark-swal-style")) {
-      const style = document.createElement("style");
-      style.id = "dark-swal-style";
-      style.innerHTML = darkSwalStyle;
-      document.head.appendChild(style);
-    }
-  }, []);
+const FIELDS = [
+  { id: "name", labelKey: "dialog.field.name", type: "text", autocomplete: "name" },
+  { id: "username", labelKey: "dialog.field.username", type: "text", autocomplete: "username" },
+  { id: "email", labelKey: "dialog.field.email", type: "email", autocomplete: "email" },
+  { id: "password", labelKey: "dialog.field.password", type: "password", autocomplete: "new-password" },
+];
 
-  // گرفتن کاربران از دیتابیس
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`${firebaseURL}.json`);
-      if (!response.ok) throw new Error("خطا در دریافت کاربران");
-      const data = await response.json();
-      if (data) {
-        // اگر key نامبر نیست (یعنی id باید int باشد). فرض میگیریم که همیشه id فیلد int است
-        const usersList = Object.entries(data).map(([key, user]) => ({
-          ...user,
-          id: user.id ? +user.id : key,
-          firebaseKey: key, // برای حذف و آپدیت لازم است
-        }));
-        setRows(usersList);
-      } else {
-        setRows([]);
-      }
-    } catch (error) {
-      console.error(error);
-      setRows([]);
-    }
-    setLoading(false);
-  };
-
-  React.useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  // تعریف ستون‌ها اینجا باشه که به توابع حذف و ویرایش دسترسی داشته باشیم
-  const columns = [
-    {
-      field: "name",
-      headerName: "نام",
-      flex: 1,
-      renderCell: (params) => (
-        <span
-          style={{
-            marginRight: 0,
-            display: "block",
-            textAlign: "right",
-            width: "100%",
-          }}
-        >
-          {params.value}
-        </span>
-      ),
-      headerAlign: "left",
-      align: "left",
-    },
-    {
-      field: "username",
-      headerName: "نام کاربری",
-      flex: 1,
-      renderCell: (params) => (
-        <span
-          style={{
-            marginRight: 0,
-            display: "block",
-            textAlign: "right",
-            width: "100%",
-          }}
-        >
-          {params.value}
-        </span>
-      ),
-      headerAlign: "left",
-      align: "left",
-    },
-    {
-      field: "email",
-      headerName: "ایمیل",
-      flex: 1.2,
-      renderCell: (params) => (
-        <span
-          style={{
-            marginRight: 0,
-            display: "block",
-            textAlign: "right",
-            width: "100%",
-          }}
-        >
-          {params.value}
-        </span>
-      ),
-      headerAlign: "left",
-      align: "left",
-    },
-    {
-      field: "password",
-      headerName: "پسورد",
-      flex: 1,
-      renderCell: (params) => (
-        <span
-          style={{
-            marginRight: 0,
-            display: "block",
-            textAlign: "right",
-            width: "100%",
-          }}
-        >
-          {params.value}
-        </span>
-      ),
-      headerAlign: "left",
-      align: "left",
-    },
-    {
-      field: "actions",
-      headerName: "عملیات",
-      width: 110,
-      sortable: false,
-      filterable: false,
-      headerAlign: "center",
-      align: "center",
-      renderCell: (params) => (
-        <div
-          style={{
-            display: "flex",
-            gap: 8,
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-            height: "100%",
-          }}
-        >
-          <IconButton
-            size="small"
-            sx={{
-              backgroundColor: "#384A71",
-              color: "#fff",
-              "&:hover": { backgroundColor: "#2c3752" },
-              px: 1.5,
-              py: 0.5,
-              borderRadius: 1,
-              transition: "all 0.18s",
-            }}
-            aria-label="ویرایش"
-            title="ویرایش"
-            onClick={() => editUserHandler(params.row)}
-          >
-            <EditOutlinedIcon sx={{ fontSize: 18 }} />
-          </IconButton>
-          <IconButton
-            size="small"
-            sx={{
-              backgroundColor: "#E91E63",
-              color: "#fff",
-              "&:hover": { backgroundColor: "#F06292" },
-              px: 1.5,
-              py: 0.5,
-              borderRadius: 1,
-              transition: "all 0.18s",
-            }}
-            aria-label="حذف"
-            title="حذف"
-            onClick={() => deleteUserHandler(params.row)}
-          >
-            <DeleteOutlineOutlinedIcon sx={{ fontSize: 18 }} />
-          </IconButton>
-        </div>
-      ),
-    },
-  ];
-
-  // تابع افزودن کاربر
-  const addUserHandler = async () => {
-    const MySwal = withReactContent(Swal);
-
-    const { value: formValues } = await MySwal.fire({
-      title: <strong>افزودن کاربر جدید</strong>,
-      html:
-        `<input id="swal-input1" class="swal2-input" placeholder="نام"/>` +
-        `<input id="swal-input2" class="swal2-input" placeholder="نام کاربری"/>` +
-        `<input id="swal-input3" class="swal2-input" placeholder="ایمیل" type="email"/>` +
-        `<input id="swal-input4" class="swal2-input" placeholder="پسورد" type="password"/>`,
-      focusConfirm: false,
-      confirmButtonText: "افزودن",
-      cancelButtonText: "انصراف",
-      showCancelButton: true,
-      preConfirm: () => {
-        return [
-          document.getElementById("swal-input1").value.trim(),
-          document.getElementById("swal-input2").value.trim(),
-          document.getElementById("swal-input3").value.trim(),
-          document.getElementById("swal-input4").value.trim(),
-        ];
-      },
-      customClass: {
-        popup: "", //تمام استایل ما بالا به صورت global اضافه شده
-      },
-    });
-
-    if (formValues && formValues.every((v) => v)) {
-      // پیدا کردن آخرین id و یکی بیشتر را انتخاب کن
-      let maxId = 0;
-      if (rows.length > 0) {
-        maxId = Math.max(...rows.map((u) => parseInt(u.id, 10) || 0));
-      }
-      const newUser = {
-        name: formValues[0],
-        username: formValues[1],
-        email: formValues[2],
-        password: formValues[3],
-        id: maxId + 1,
-      };
-      try {
-        // اضافه کن به دیتابیس (POST to /users.json)
-        await fetch(`${firebaseURL}.json`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newUser),
-        });
-        await fetchUsers();
-        Swal.fire({
-          icon: "success",
-          title: "کاربر با موفقیت افزوده شد!",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-      } catch (err) {
-        Swal.fire({ icon: "error", title: "خطا در ثبت کاربر" });
-      }
-    } else if (formValues) {
-      Swal.fire({
-        icon: "error",
-        title: "همه فیلدها باید پر شوند!",
-      });
-    }
-  };
-
-  // حذف کاربر
-  const deleteUserHandler = async (row) => {
-    const MySwal = withReactContent(Swal);
-    const result = await MySwal.fire({
-      title: `حذف کاربر`,
-      text: `آیا از حذف "${row.name}" مطمئن هستید؟`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "حذف",
-      cancelButtonText: "انصراف",
-      customClass: {
-        popup: "", //استایل اجراشده سمت بالا همه modalها را دارک میکند
-      },
-    });
-    if (result.isConfirmed) {
-      if (!row.firebaseKey) {
-        Swal.fire({ icon: "error", title: "خطا در حذف کاربر" });
-        return;
-      }
-      try {
-        await fetch(`${firebaseURL}/${row.firebaseKey}.json`, {
-          method: "DELETE",
-        });
-        await fetchUsers();
-        Swal.fire({
-          icon: "success",
-          title: "کاربر حذف شد!",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-      } catch (err) {
-        Swal.fire({ icon: "error", title: "خطا در حذف کاربر" });
-      }
-    }
-  };
-
-  // ویرایش کاربر
-  const editUserHandler = async (row) => {
-    const MySwal = withReactContent(Swal);
-    const { value: formValues } = await MySwal.fire({
-      title: <strong>ویرایش کاربر</strong>,
-      html:
-        `<input id="swal-input1" class="swal2-input" placeholder="نام" value="${
-          row.name || ""
-        }"/>` +
-        `<input id="swal-input2" class="swal2-input" placeholder="نام کاربری" value="${
-          row.username || ""
-        }"/>` +
-        `<input id="swal-input3" class="swal2-input" placeholder="ایمیل" type="email" value="${
-          row.email || ""
-        }"/>` +
-        `<input id="swal-input4" class="swal2-input" placeholder="پسورد" type="password" value="${
-          row.password || ""
-        }"/>`,
-      focusConfirm: false,
-      confirmButtonText: "ذخیره تغییرات",
-      cancelButtonText: "انصراف",
-      showCancelButton: true,
-      preConfirm: () => {
-        return [
-          document.getElementById("swal-input1").value.trim(),
-          document.getElementById("swal-input2").value.trim(),
-          document.getElementById("swal-input3").value.trim(),
-          document.getElementById("swal-input4").value.trim(),
-        ];
-      },
-      customClass: {
-        popup: "",
-      },
-    });
-
-    if (formValues && formValues.every((v) => v)) {
-      const updatedUser = {
-        id: row.id,
-        name: formValues[0],
-        username: formValues[1],
-        email: formValues[2],
-        password: formValues[3],
-      };
-      try {
-        await fetch(`${firebaseURL}/${row.firebaseKey}.json`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedUser),
-        });
-        await fetchUsers();
-        Swal.fire({
-          icon: "success",
-          title: "تغییرات ذخیره شد!",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-      } catch (err) {
-        Swal.fire({ icon: "error", title: "خطا در ویرایش کاربر" });
-      }
-    } else if (formValues) {
-      Swal.fire({
-        icon: "error",
-        title: "همه فیلدها باید پر شوند!",
-      });
-    }
-  };
-
-  const theme = createTheme(
-    {
-      direction: "rtl",
-      palette: {
-        mode: "dark",
-        background: {
-          default: "#131B2F", // Table background
-          paper: "#131B2F",
-        },
-      },
-      typography: {
-        fontFamily: [
-          "IRANSans",
-          "Vazirmatn",
-          "Tahoma",
-          "Segoe UI",
-          "sans-serif",
-        ].join(","),
-      },
-    },
-    faIR
+const escapeHtml = (value = "") =>
+  String(value).replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
   );
 
-  // محاسبه ارتفاع ثابت متناسب با تعداد ردیف‌ها برای جلوگیری از ردیف خالی اضافه
-  const rowHeight = 52;
-  const headerHeight = 56;
-  const footerHeight = 56;
-  const pageSize = 5;
+function buildForm(t, values = {}) {
+  return FIELDS.map(
+    (field) => `
+      <div class="swal2-field">
+        <label for="f-${field.id}">${t(field.labelKey)}</label>
+        <input id="f-${field.id}" type="${field.type}" name="${field.id}"
+               autocomplete="${field.autocomplete}"
+               placeholder="${t(field.labelKey)}"
+               value="${escapeHtml(values[field.id] ?? "")}" />
+      </div>`
+  ).join("");
+}
 
-  const [paginationModel, setPaginationModel] = React.useState({
-    page: 0,
-    pageSize: pageSize,
+function readForm(t) {
+  const values = {};
+  let firstInvalid = null;
+
+  for (const field of FIELDS) {
+    const input = document.getElementById(`f-${field.id}`);
+    values[field.id] = input.value.trim();
+    input.setAttribute("aria-invalid", "false");
+  }
+
+  const errors = [];
+  if (FIELDS.some((f) => !values[f.id])) errors.push(t("dialog.error.required"));
+  if (values.email && !EMAIL_RE.test(values.email))
+    errors.push(t("dialog.error.email"));
+
+  if (errors.length) {
+    for (const field of FIELDS) {
+      const input = document.getElementById(`f-${field.id}`);
+      const invalid =
+        !values[field.id] ||
+        (field.id === "email" && !EMAIL_RE.test(values.email));
+      if (invalid) {
+        input.setAttribute("aria-invalid", "true");
+        firstInvalid ??= input;
+      }
+    }
+    // Focus the first field that needs fixing (WCAG focus management)
+    firstInvalid?.focus();
+    Swal.showValidationMessage(errors[0]);
+    return false;
+  }
+
+  return values;
+}
+
+const toast = (icon, title) =>
+  Swal.fire({
+    icon,
+    title,
+    timer: 2000,
+    timerProgressBar: true,
+    showConfirmButton: false,
+    position: "top-end",
+    toast: true,
+    width: "auto",
   });
 
-  const firstRowIndex = paginationModel.page * paginationModel.pageSize;
-  const lastRowIndex = Math.min(
-    firstRowIndex + paginationModel.pageSize,
-    rows.length
-  );
-  const visibleRowsCount = lastRowIndex - firstRowIndex;
+/* ── Table states ────────────────────────────────────────────────────────── */
 
-  // اگر ردیف کمتر از pageSize بود، ارتفاع را کاهش بده تا ردیف اضافه نیاد
-  const calculatedHeight =
-    headerHeight +
-    (visibleRowsCount > 0 ? visibleRowsCount * rowHeight : rowHeight) +
-    footerHeight;
+function TableMessage({ Icon, title, body, action, tone = "muted" }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
+      <span
+        className={[
+          "grid size-12 place-items-center rounded-full",
+          tone === "danger"
+            ? "bg-danger/10 text-danger"
+            : "bg-elevated text-fg-subtle",
+        ].join(" ")}
+      >
+        <Icon aria-hidden="true" className="size-5" strokeWidth={1.75} />
+      </span>
+      <div>
+        <p className="text-sm font-medium text-fg">{title}</p>
+        <p className="mt-1 text-[13px] text-fg-muted">{body}</p>
+      </div>
+      {action}
+    </div>
+  );
+}
+
+/* ── Component ───────────────────────────────────────────────────────────── */
+
+export default function UsersTable() {
+  const { t, isRtl, formatNumber } = useI18n();
+
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [query, setQuery] = useState("");
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: PAGE_SIZE,
+  });
+
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const response = await fetch(`${firebaseURL}.json`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      setRows(
+        data
+          ? Object.entries(data).map(([key, user]) => ({
+              ...user,
+              id: user.id ? +user.id : key,
+              firebaseKey: key, // addresses the record for PUT/DELETE
+            }))
+          : []
+      );
+    } catch (err) {
+      console.error(err);
+      setRows([]);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const filteredRows = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((row) =>
+      ["name", "username", "email"].some((field) =>
+        String(row[field] ?? "").toLowerCase().includes(q)
+      )
+    );
+  }, [rows, query]);
+
+  /* ── Mutations ── */
+
+  const addUser = async () => {
+    const { value } = await Swal.fire({
+      title: t("dialog.addTitle"),
+      html: buildForm(t),
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: t("dialog.add"),
+      cancelButtonText: t("dialog.cancel"),
+      preConfirm: () => readForm(t),
+    });
+    if (!value) return;
+
+    const maxId = rows.length
+      ? Math.max(...rows.map((u) => parseInt(u.id, 10) || 0))
+      : 0;
+
+    try {
+      const res = await fetch(`${firebaseURL}.json`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...value, id: maxId + 1 }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await fetchUsers();
+      toast("success", t("dialog.success.added"));
+    } catch (err) {
+      console.error(err);
+      toast("error", t("dialog.error.add"));
+    }
+  };
+
+  const editUser = async (row) => {
+    const { value } = await Swal.fire({
+      title: t("dialog.editTitle"),
+      html: buildForm(t, row),
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: t("dialog.save"),
+      cancelButtonText: t("dialog.cancel"),
+      preConfirm: () => readForm(t),
+    });
+    if (!value) return;
+
+    try {
+      const res = await fetch(`${firebaseURL}/${row.firebaseKey}.json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...value, id: row.id }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await fetchUsers();
+      toast("success", t("dialog.success.updated"));
+    } catch (err) {
+      console.error(err);
+      toast("error", t("dialog.error.update"));
+    }
+  };
+
+  const deleteUser = async (row) => {
+    const { isConfirmed } = await Swal.fire({
+      title: t("dialog.confirmDelete"),
+      text: t("dialog.confirmDeleteBody", { name: row.name }),
+      icon: "warning",
+      iconColor: "#F5556D",
+      showCancelButton: true,
+      focusCancel: true,
+      confirmButtonText: t("dialog.delete"),
+      cancelButtonText: t("dialog.cancel"),
+      customClass: { confirmButton: "swal2-danger" },
+    });
+    if (!isConfirmed || !row.firebaseKey) return;
+
+    try {
+      const res = await fetch(`${firebaseURL}/${row.firebaseKey}.json`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await fetchUsers();
+      toast("success", t("dialog.success.deleted"));
+    } catch (err) {
+      console.error(err);
+      toast("error", t("dialog.error.delete"));
+    }
+  };
+
+  /* ── Columns ── */
+
+  const columns = useMemo(
+    () => [
+      {
+        field: "name",
+        headerName: t("users.col.name"),
+        flex: 1.2,
+        minWidth: 180,
+        renderCell: ({ row }) => (
+          <span className="flex h-full items-center gap-3">
+            <span
+              aria-hidden="true"
+              className="grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-elevated font-mono text-[11px] leading-none text-fg-muted ring-1 ring-line"
+            >
+              {String(row.name ?? "?")
+                .trim()
+                .split(/\s+/)
+                .slice(0, 2)
+                .map((w) => [...w][0] ?? "")
+                .join("")
+                .toUpperCase()}
+            </span>
+            <span className="truncate text-fg">{row.name}</span>
+          </span>
+        ),
+      },
+      {
+        field: "username",
+        headerName: t("users.col.username"),
+        flex: 1,
+        minWidth: 140,
+        renderCell: ({ value }) => (
+          <span className="font-mono text-[13px] text-fg-muted">@{value}</span>
+        ),
+      },
+      {
+        field: "email",
+        headerName: t("users.col.email"),
+        flex: 1.4,
+        minWidth: 200,
+      },
+      {
+        field: "password",
+        headerName: t("users.col.password"),
+        flex: 0.8,
+        minWidth: 120,
+        sortable: false,
+        renderCell: ({ value }) => (
+          <span className="font-mono tracking-[0.2em] text-fg-subtle">
+            {"•".repeat(Math.min(String(value ?? "").length || 8, 10))}
+          </span>
+        ),
+      },
+      {
+        field: "actions",
+        headerName: t("users.col.actions"),
+        width: 112,
+        sortable: false,
+        filterable: false,
+        disableColumnMenu: true,
+        headerAlign: "center",
+        align: "center",
+        renderCell: ({ row }) => (
+          <span className="flex h-full items-center justify-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => editUser(row)}
+              aria-label={`${t("users.edit")}: ${row.name}`}
+              title={t("users.edit")}
+              className="grid size-9 cursor-pointer place-items-center rounded-lg border border-line bg-panel text-fg-muted transition-colors duration-200 hover:border-accent/50 hover:text-accent"
+            >
+              <LuPencil className="size-4" strokeWidth={1.75} />
+            </button>
+            <button
+              type="button"
+              onClick={() => deleteUser(row)}
+              aria-label={`${t("users.delete")}: ${row.name}`}
+              title={t("users.delete")}
+              className="grid size-9 cursor-pointer place-items-center rounded-lg border border-line bg-panel text-fg-muted transition-colors duration-200 hover:border-danger/50 hover:text-danger"
+            >
+              <LuTrash2 className="size-4" strokeWidth={1.75} />
+            </button>
+          </span>
+        ),
+      },
+    ],
+    // editUser / deleteUser are stable enough for this table's lifetime
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [t, rows]
+  );
+
+  /* ── MUI theme: map the DataGrid onto the console palette ── */
+
+  const theme = useMemo(
+    () =>
+      createTheme(
+        {
+          direction: isRtl ? "rtl" : "ltr",
+          palette: {
+            mode: "dark",
+            primary: { main: "#2DE2C5" },
+            background: { default: "#0D1220", paper: "#0D1220" },
+            text: { primary: "#E6EBF5", secondary: "#8B9AB8" },
+            divider: "#1E2740",
+          },
+          typography: {
+            fontFamily: isRtl
+              ? "Vazirmatn, Instrument Sans, sans-serif"
+              : "Instrument Sans, ui-sans-serif, sans-serif",
+            fontSize: 14,
+          },
+        },
+        isRtl ? faIR : enUS
+      ),
+    [isRtl]
+  );
+
+  const gridSx = {
+    border: "none",
+    color: "#E6EBF5",
+    "--DataGrid-rowBorderColor": "#161E33",
+    "& .MuiDataGrid-columnHeaders": { borderBottom: "1px solid #1E2740" },
+    "& .MuiDataGrid-columnHeader": {
+      backgroundColor: "#0B1120",
+      color: "#5C6B87",
+      // Persian has no letter case and dislikes wide tracking — see .eyebrow
+      fontFamily: isRtl ? "Vazirmatn, sans-serif" : "'JetBrains Mono', monospace",
+      fontSize: isRtl ? 12 : 11,
+      letterSpacing: isRtl ? 0 : "0.12em",
+      textTransform: isRtl ? "none" : "uppercase",
+    },
+    "& .MuiDataGrid-columnSeparator": { display: "none" },
+    "& .MuiDataGrid-cell": {
+      borderBottom: "1px solid #161E33",
+      outline: "none !important",
+    },
+    "& .MuiDataGrid-row": {
+      transition: "background-color 160ms ease",
+      "&:hover": { backgroundColor: "#111A2C" },
+      "&.Mui-selected": {
+        backgroundColor: "#14203A",
+        "&:hover": { backgroundColor: "#182645" },
+      },
+    },
+    "& .MuiDataGrid-footerContainer": {
+      borderTop: "1px solid #1E2740",
+      minHeight: 52,
+    },
+    "& .MuiTablePagination-root": { color: "#8B9AB8" },
+    "& .MuiCheckbox-root": { color: "#3B486B", "&.Mui-checked": { color: "#2DE2C5" } },
+    "& .MuiDataGrid-overlay": { backgroundColor: "transparent" },
+    "& .MuiDataGrid-virtualScroller": { minHeight: 120 },
+  };
+
+  /* ── Render ── */
+
+  const showEmpty = !loading && !error && filteredRows.length === 0;
 
   return (
-    <div className="mt-5 p-5">
-      <div className="flex justify-end mb-4 w-full">
-        <button
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-7 rounded-lg"
-          onClick={addUserHandler}
-        >
-          افزودن کاربر
-        </button>
-      </div>
-      <ThemeProvider theme={theme}>
-        <Box
-          sx={{
-            height: calculatedHeight,
-            width: "100%",
-            direction: "rtl",
-          }}
-        >
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            loading={loading}
-            initialState={{
-              pagination: { paginationModel: { pageSize: pageSize } },
-            }}
-            pageSizeOptions={[pageSize]}
-            paginationModel={paginationModel}
-            onPaginationModelChange={setPaginationModel}
-            checkboxSelection
-            sx={{
-              direction: "rtl",
-              bgcolor: "#131B2F", // Table main background changed
-              "& .MuiDataGrid-footerContainer": { justifyContent: "flex-end" },
-              "& .MuiDataGrid-cell": {
-                justifyContent: "flex-end",
-                textAlign: "right",
-                paddingRight: "0.5rem",
-                bgcolor: "#131B2F", // Changed
-              },
-              "& .MuiDataGrid-columnHeader": {
-                textAlign: "right",
-                justifyContent: "flex-end",
-                bgcolor: "#24304B", // Header background color changed
-                color: "#fff",
-              },
-              "& .MuiDataGrid-columnHeaderCheckbox, & .MuiDataGrid-cellCheckbox":
-                {
-                  justifyContent: "flex-end",
-                  flexDirection: "row-reverse",
-                  bgcolor: "#24304B",
-                },
-              "& .MuiDataGrid-cellCheckbox": {
-                backgroundColor: "#131B2F",
-              },
-              "& .MuiDataGrid-row": {
-                bgcolor: "#131B2F",
-              },
-              "& .MuiDataGrid-row.Mui-selected": {
-                backgroundColor: "#26314d !important",
-              },
-              "& .MuiDataGrid-virtualScroller": {
-                bgcolor: "#131B2F",
-              },
-              "& .MuiCheckbox-root": {
-                color: "#fff",
-              },
-            }}
-            localeText={faIR.components.MuiDataGrid.defaultProps.localeText}
-          />
-        </Box>
-      </ThemeProvider>
-    </div>
+    <section className="surface-card overflow-hidden">
+      {/* Toolbar */}
+      <header className="flex flex-wrap items-center gap-3 border-b border-line px-5 py-4">
+        <div className="min-w-0">
+          <h2 className="text-[15px] font-semibold tracking-tight">
+            {t("users.title")}
+          </h2>
+          <p className="mt-0.5 text-xs text-fg-subtle">
+            {t(rows.length === 1 ? "users.count_one" : "users.count", {
+              n: formatNumber(rows.length),
+            })}
+          </p>
+        </div>
+
+        <div className="ms-auto flex flex-wrap items-center gap-2">
+          <div className="relative">
+            <LuSearch
+              aria-hidden="true"
+              className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-fg-subtle"
+              strokeWidth={1.75}
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label={t("users.search")}
+              placeholder={t("users.search")}
+              className="h-10 w-full rounded-lg border border-line bg-canvas ps-9 pe-3 text-sm placeholder:text-fg-subtle focus:border-accent focus:outline-none focus:ring-[3px] focus:ring-accent/15 sm:w-56"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={fetchUsers}
+            disabled={loading}
+            aria-label={t("users.refresh")}
+            title={t("users.refresh")}
+            className="btn-ghost !w-10 !px-0"
+          >
+            <LuRefreshCw
+              className={`size-4 ${loading ? "animate-spin" : ""}`}
+              strokeWidth={1.75}
+            />
+          </button>
+
+          <button type="button" onClick={addUser} className="btn-primary">
+            <LuPlus className="size-4" strokeWidth={2.25} />
+            {t("users.add")}
+          </button>
+        </div>
+      </header>
+
+      {error ? (
+        <TableMessage
+          Icon={LuCircleAlert}
+          tone="danger"
+          title={t("users.error.title")}
+          body={t("users.error.body")}
+          action={
+            <button type="button" onClick={fetchUsers} className="btn-ghost">
+              <LuRefreshCw className="size-4" strokeWidth={1.75} />
+              {t("users.retry")}
+            </button>
+          }
+        />
+      ) : showEmpty ? (
+        <TableMessage
+          Icon={LuInbox}
+          title={t("users.empty.title")}
+          body={t("users.empty.body")}
+          action={
+            <button type="button" onClick={addUser} className="btn-primary">
+              <LuPlus className="size-4" strokeWidth={2.25} />
+              {t("users.add")}
+            </button>
+          }
+        />
+      ) : (
+        <ThemeProvider theme={theme}>
+          <Box sx={{ width: "100%" }} dir={isRtl ? "rtl" : "ltr"}>
+            <DataGrid
+              rows={filteredRows}
+              columns={columns}
+              loading={loading}
+              rowHeight={60}
+              columnHeaderHeight={44}
+              checkboxSelection
+              disableRowSelectionOnClick
+              pageSizeOptions={[PAGE_SIZE, 25, 50]}
+              paginationModel={paginationModel}
+              onPaginationModelChange={setPaginationModel}
+              sx={gridSx}
+              localeText={
+                (isRtl ? faIR : enUS).components.MuiDataGrid.defaultProps
+                  .localeText
+              }
+            />
+          </Box>
+        </ThemeProvider>
+      )}
+    </section>
   );
 }

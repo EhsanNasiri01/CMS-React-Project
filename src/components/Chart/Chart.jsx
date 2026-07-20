@@ -1,165 +1,167 @@
-import React from "react";
-import Chart from "react-apexcharts";
+import { useMemo } from "react";
+import ApexChart from "react-apexcharts";
+import { useI18n } from "../../i18n/useI18n";
+import Panel from "../ui/Panel";
 
-// داده‌های شبیه‌سازی شده برای نمودار
-const chartData = [
-  { name: "شنبه", thisWeek: 110000000, lastWeek: 100000000 },
-  { name: "یکشنبه", thisWeek: 145000000, lastWeek: 120000000 },
-  { name: "دوشنبه", thisWeek: 160000000, lastWeek: 155000000 },
-  { name: "سه شنبه", thisWeek: 220342123, lastWeek: 170000000 },
-  { name: "چهار شنبه", thisWeek: 195000000, lastWeek: 230000000 },
-  { name: "پنج شنبه", thisWeek: 170000000, lastWeek: 200000000 },
-  { name: "جمعه", thisWeek: 160000000, lastWeek: 155000000 },
+const DAYS = [
+  { key: "day.sat", thisWeek: 110000000, lastWeek: 100000000 },
+  { key: "day.sun", thisWeek: 145000000, lastWeek: 120000000 },
+  { key: "day.mon", thisWeek: 160000000, lastWeek: 155000000 },
+  { key: "day.tue", thisWeek: 220342123, lastWeek: 170000000 },
+  { key: "day.wed", thisWeek: 195000000, lastWeek: 230000000 },
+  { key: "day.thu", thisWeek: 170000000, lastWeek: 200000000 },
+  { key: "day.fri", thisWeek: 160000000, lastWeek: 155000000 },
 ];
 
-const MyChart = () => {
-  // پیکربندی داده‌ها (series)
-  const series = [
-    {
-      name: "این هفته",
-      data: chartData.map((item) => item.thisWeek),
-    },
-    {
-      name: "هفته آخر",
-      data: chartData.map((item) => item.lastWeek),
-    },
-  ];
+const SERIES_COLORS = ["#2DE2C5", "#4E5F8A"];
 
-  // پیکربندی تنظیمات ظاهری (options)
-  // --- این بخش توسط خود کتابخانه ApexCharts خوانده می‌شود و نیازی به Tailwind ندارد ---
-  const options = {
-    chart: {
-      id: "views-line-chart",
-      toolbar: { show: false },
-      background: "#131B2F",
-      foreColor: "#8A9CBF",
-    },
-    stroke: {
-      curve: "smooth",
-      width: [3, 2],
-      colors: ["#00F6FF", "#262F46"],
-    },
-    grid: {
-      show: true,
-      borderColor: "#1F283E",
-      xaxis: { lines: { show: false } },
-      padding: { top: 0, right: 20, bottom: 0, left: 0 },
-    },
-    xaxis: {
-      categories: chartData.map((item) => item.name),
-      axisBorder: { show: false },
-      axisTicks: { show: false },
-      labels: { style: { colors: "#8A9CBF", fontSize: "12px" } },
-    },
-    yaxis: {
-      labels: {
-        show: true,
-        formatter: (value) => {
-          if (value >= 1000000) {
-            return `${(value / 1000000).toFixed(0)}M`;
-          }
-          return value;
+/** Legend doubles as the series key; kept outside the SVG so it never clips. */
+function Legend({ items }) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+      {items.map(({ label, color, dashed }) => (
+        <span
+          key={label}
+          className="flex items-center gap-2 text-xs text-fg-muted"
+        >
+          <span
+            aria-hidden="true"
+            className="h-0.5 w-4 rounded-full"
+            style={{
+              background: dashed
+                ? `repeating-linear-gradient(90deg, ${color} 0 4px, transparent 4px 7px)`
+                : color,
+            }}
+          />
+          {label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+export default function TrafficChart() {
+  const { t, formatNumber, lang } = useI18n();
+
+  const series = useMemo(
+    () => [
+      { name: t("chart.thisWeek"), data: DAYS.map((d) => d.thisWeek) },
+      { name: t("chart.lastWeek"), data: DAYS.map((d) => d.lastWeek) },
+    ],
+    [t]
+  );
+
+  const options = useMemo(
+    () => ({
+      chart: {
+        id: "traffic",
+        type: "area",
+        toolbar: { show: false },
+        zoom: { enabled: false },
+        background: "transparent",
+        foreColor: "#8B9AB8",
+        fontFamily: "inherit",
+        animations: { easing: "easeout", speed: 400 },
+      },
+      colors: SERIES_COLORS,
+      stroke: { curve: "smooth", width: [2.5, 2], dashArray: [0, 5] },
+      grid: {
+        borderColor: "#1E2740",
+        strokeDashArray: 3,
+        xaxis: { lines: { show: false } },
+        padding: { top: 0, right: 8, bottom: 0, left: 4 },
+      },
+      xaxis: {
+        categories: DAYS.map((d) => t(d.key)),
+        axisBorder: { show: false },
+        axisTicks: { show: false },
+        tooltip: { enabled: false },
+        labels: { style: { colors: "#5C6B87", fontSize: "12px" } },
+      },
+      yaxis: {
+        labels: {
+          formatter: (v) =>
+            v >= 1_000_000
+              ? `${formatNumber(Math.round(v / 1_000_000))}M`
+              : formatNumber(v),
+          style: { colors: ["#5C6B87"], fontSize: "12px" },
         },
-        style: { colors: ["#8A9CBF"] },
       },
-    },
-    tooltip: {
-      theme: "dark",
-      style: { fontSize: "14px", fontFamily: "inherit" },
-      x: { show: true },
-      custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-        const value = series[seriesIndex][dataPointIndex];
-        const formattedValue = new Intl.NumberFormat().format(value);
-        const label = w.globals.labels[dataPointIndex];
-        return (
-          '<div class="apexcharts-custom-tooltip" style="padding: 10px 20px; background-color: #071026; border-radius: 8px; border: 1px solid #00C4FF;">' +
-          '<div style="color: #8A9CBF; font-size: 12px;">این هفته</div>' +
-          '<div style="color: white; font-size: 18px; font-weight: bold;">' +
-          formattedValue +
-          "</div>" +
-          '<div style="color: #8A9CBF; font-size: 12px;">' +
-          label +
-          "</div>" +
-          "</div>"
-        );
+      tooltip: {
+        theme: "dark",
+        shared: true,
+        intersect: false,
+        custom: ({ series: s, dataPointIndex, w }) => {
+          const rows = s
+            .map(
+              (set, i) => `
+              <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;">
+                <span style="display:flex;align-items:center;gap:6px;color:#8B9AB8;font-size:12px;">
+                  <span style="width:10px;height:2px;border-radius:2px;background:${
+                    SERIES_COLORS[i]
+                  };"></span>${w.globals.seriesNames[i]}
+                </span>
+                <span style="color:#E6EBF5;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;">${formatNumber(
+                  set[dataPointIndex]
+                )}</span>
+              </div>`
+            )
+            .join("");
+          return `<div style="padding:12px 14px;background:#0D1220;border:1px solid #2C3857;border-radius:12px;box-shadow:0 16px 40px -16px rgba(0,0,0,.9);min-width:200px;display:flex;flex-direction:column;gap:8px;">
+              <div style="color:#5C6B87;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;">${
+                w.globals.labels[dataPointIndex]
+              }</div>${rows}</div>`;
+        },
       },
-    },
-    markers: {
-      size: 0,
-      strokeWidth: 0,
-      hover: {
-        size: 8,
-        sizeOffset: 0,
-        strokeWidth: 3,
-        strokeColors: "#00C4FF",
-        fillColors: "#071026",
+      markers: {
+        size: 0,
+        hover: {
+          size: 5,
+          sizeOffset: 0,
+        },
+        strokeColors: "#070B14",
+        strokeWidth: 2,
       },
-    },
-    fill: {
-      type: "gradient",
-      gradient: {
-        shade: "dark",
-        type: "vertical",
-        shadeIntensity: 0.8,
-        gradientToColors: ["#1a1f33", "#1a1f33"],
-        inverseColors: false,
-        opacityFrom: 0.5,
-        opacityTo: 0.05,
-        stops: [0, 100],
+      fill: {
+        type: ["gradient", "solid"],
+        gradient: {
+          shadeIntensity: 0,
+          opacityFrom: 0.28,
+          opacityTo: 0,
+          stops: [0, 100],
+        },
+        opacity: [1, 0],
       },
-    },
-    legend: { show: false },
-    dataLabels: { enabled: false },
-  };
+      legend: { show: false },
+      dataLabels: { enabled: false },
+    }),
+    [t, formatNumber]
+  );
 
   return (
-    <div
-      // style={{
-      //   background: "#131B2F",
-      //   padding: "15px",
-      //   borderRadius: "12px",
-      //   height: "327px",
-      //   maxHeight: "327px",
-      //   boxSizing: "border-box",
-      //   display: "flex",
-      //   flexDirection: "column",
-      // }}
-      className="bg-[#131B2F] py-[15px] pl-[15px] rounded-xl h-[327px] max-h-[327px] box-border flex flex-col"
+    <Panel
+      title={t("chart.traffic")}
+      hint={t("chart.trafficHint")}
+      actions={
+        <Legend
+          items={[
+            { label: t("chart.thisWeek"), color: SERIES_COLORS[0] },
+            { label: t("chart.lastWeek"), color: "#7E8DB4", dashed: true },
+          ]}
+        />
+      }
+      bodyClassName="pt-2"
     >
-      <div
-        // style={{ color: "white", fontSize: "18px", marginBottom: "30px" }}
-        className="flex gap-x-2 items-center text-white text-lg mb-[30px]"
-      >
-        بازدید ها
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-          className="w-5 h-5 text-gray-400"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"
-          />
-        </svg>
-      </div>
-      <div
-        // style={{ flex: 1, minHeight: 0 }}
-        className="flex-1 min-h-0" // min-h-0 برای اطمینان از نمایش صحیح چارت در flex-col
-      >
-        <Chart
+      <div className="h-[300px] min-h-0">
+        <ApexChart
+          key={lang}
           options={options}
           series={series}
           type="area"
-          height={"100%"}
+          height="100%"
           width="100%"
         />
       </div>
-    </div>
+    </Panel>
   );
-};
-
-export default MyChart;
+}

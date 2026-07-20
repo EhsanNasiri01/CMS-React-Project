@@ -1,24 +1,22 @@
-import React from "react";
-import Header from "../Header/Header";
-import Navigator from "../Navigator/Navigator";
-import Sidebar from "../Sidebar/Sidebar";
-import LeftSidebar from "../LeftSidebar/LeftSidebar";
+import AppLayout from "../layout/AppLayout";
 import UsersTable from "../UsersTable/UsersTable";
+import { useI18n } from "../../i18n/useI18n";
 
 export default function Users() {
+  const { t } = useI18n();
+
   return (
-    <div className="flex h-screen bg-dark-bg overflow-hidden">
-      <Sidebar />
-      <div className="flex flex-col flex-1 min-w-0">
-        <Header />
-        <div className="flex flex-1 overflow-hidden">
-          <div className="flex-1 pl-4 mr-8 overflow-y-auto">
-            <Navigator />
-            <UsersTable></UsersTable>
-          </div>
-          <LeftSidebar></LeftSidebar>
-        </div>
+    <AppLayout
+      title={t("page.users.title")}
+      subtitle={t("page.users.subtitle")}
+      crumbs={[
+        { label: t("crumb.home"), to: "/" },
+        { label: t("page.users.title") },
+      ]}
+    >
+      <div className="animate-fade-up">
+        <UsersTable />
       </div>
-    </div>
+    </AppLayout>
   );
 }

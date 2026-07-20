@@ -1,221 +1,173 @@
-import React from "react";
+import { LuArrowRight, LuGauge } from "react-icons/lu";
+import { useI18n } from "../../i18n/useI18n";
 
-export default function LeftSidebar() {
+const ACTIVITY = [
+  { key: "activity.projectUpdated", when: ["rail.now"], initials: "MK" },
+  { key: "activity.released", when: ["rail.minutesAgo", { n: 59 }], initials: "AT" },
+  { key: "activity.bugFiled", when: ["rail.hoursAgo", { n: 12 }], initials: "SR" },
+  { key: "activity.dataEdited", when: ["rail.today", { time: "11:59" }], initials: "EN" },
+];
+
+const TEAM = [
+  { name: "Ehsan Nasiri", initials: "EN", online: true },
+  { name: "Abolfazl Rezaei", initials: "AR", online: true },
+  { name: "Mohammad Karimi", initials: "MK", online: false },
+  { name: "Mehdi Sadeghi", initials: "MS", online: true },
+  { name: "Ali Ahmadi", initials: "AA", online: false },
+  { name: "Mohsen Tabrizi", initials: "MT", online: false },
+];
+
+const LOAD_SCORE = 46;
+
+function Avatar({ initials, online }) {
   return (
-    <section className="border-r-2 border-darker-bg h-screen">
-      <div class="w-[300px] bg-[#131B2F] ">
-        <div class="w-full max-w-xs rounded-lg p-6 text-white flex flex-col gap-y-8">
-          <div class="flex flex-col gap-y-4">
-            <div class="flex items-center gap-x-2">
-              <h3 class="font-semibold text-white">فعالیت ها</h3>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
-                class="w-5 h-5 text-gray-400"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"
-                />
-              </svg>
-            </div>
+    <span className="relative shrink-0">
+      <span
+        aria-hidden="true"
+        className="grid size-8 place-items-center rounded-full bg-elevated font-mono text-[11px] font-medium text-fg-muted ring-1 ring-line"
+      >
+        {initials}
+      </span>
+      {online !== undefined && (
+        <span
+          aria-hidden="true"
+          className={[
+            "absolute -bottom-0.5 -end-0.5 size-2.5 rounded-full ring-2 ring-surface",
+            online ? "bg-success" : "bg-fg-subtle",
+          ].join(" ")}
+        />
+      )}
+    </span>
+  );
+}
 
-            <ul class="flex flex-col">
-              <li class="flex gap-x-3">
-                <div class="flex flex-col items-center">
-                  <img
-                    class="w-8 h-8 rounded-full"
-                    src="https://placehold.co/40x40/a0aec0/E2E8F0"
-                    alt="avatar"
+function RailSection({ title, action, children }) {
+  return (
+    <section>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <h2 className="eyebrow">{title}</h2>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+/**
+ * Context rail. Secondary information only — every item here is also
+ * reachable from a primary page, so hiding it below xl costs nothing.
+ */
+export default function LeftSidebar() {
+  const { t, formatNumber } = useI18n();
+  const circumference = 2 * Math.PI * 26;
+
+  return (
+    <aside
+      aria-label={t("rail.activity")}
+      className="hidden w-[300px] shrink-0 overflow-y-auto border-s border-line bg-surface px-5 py-6 xl:block"
+    >
+      <div className="flex flex-col gap-8">
+        <RailSection
+          title={t("rail.activity")}
+          action={
+            <button
+              type="button"
+              className="flex cursor-pointer items-center gap-1 text-[11px] text-fg-subtle transition-colors hover:text-accent"
+            >
+              {t("rail.viewAll")}
+              <LuArrowRight
+                aria-hidden="true"
+                className="size-3 rtl:rotate-180"
+                strokeWidth={2}
+              />
+            </button>
+          }
+        >
+          <ol className="relative">
+            {ACTIVITY.map((item, i) => (
+              <li key={item.key} className="relative flex gap-3 pb-4 last:pb-0">
+                {/* Timeline spine */}
+                {i < ACTIVITY.length - 1 && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute start-4 top-9 h-[calc(100%-2rem)] w-px -translate-x-1/2 bg-line rtl:translate-x-1/2"
                   />
-                  <div class="w-px h-6 bg-[#3F4E6B] my-1"></div>
-                </div>
-                <div class="flex flex-col -mt-1">
-                  <p class="text-white text-sm">جزئیات پروژه X تغییر کرد</p>
-                  <p class="text-gray-400 text-xs">همین حالا</p>
+                )}
+                <Avatar initials={item.initials} />
+                <div className="min-w-0 pt-0.5">
+                  <p className="text-[13px] leading-snug text-fg">
+                    {t(item.key)}
+                  </p>
+                  <p className="eyebrow mt-0.5 !text-[10px]">
+                    {t(item.when[0], item.when[1])}
+                  </p>
                 </div>
               </li>
+            ))}
+          </ol>
+        </RailSection>
 
-              <li class="flex gap-x-3">
-                <div class="flex flex-col items-center">
-                  <img
-                    class="w-8 h-8 rounded-full"
-                    src="https://placehold.co/40x40/718096/E2E8F0"
-                    alt="avatar"
-                  />
-                  <div class="w-px h-6 bg-[#3F4E6B] my-1"></div>
-                </div>
-                <div class="flex flex-col -mt-1">
-                  <p class="text-white text-sm">نسخه جدید منتشر شد</p>
-                  <p class="text-gray-400 text-xs">۵۹ دقیقه پیش</p>
-                </div>
+        <RailSection title={t("rail.team")}>
+          <ul className="space-y-3">
+            {TEAM.map((member) => (
+              <li key={member.name} className="flex items-center gap-3">
+                <Avatar initials={member.initials} online={member.online} />
+                <span className="truncate text-[13px] text-fg">
+                  {member.name}
+                </span>
               </li>
+            ))}
+          </ul>
+        </RailSection>
 
-              <li class="flex gap-x-3">
-                <div class="flex flex-col items-center">
-                  <img
-                    class="w-8 h-8 rounded-full"
-                    src="https://placehold.co/40x40/4A5568/E2E8F0"
-                    alt="avatar"
-                  />
-                  <div class="w-px h-6 bg-[#3F4E6B] my-1"></div>
-                </div>
-                <div class="flex flex-col -mt-1">
-                  <p class="text-white text-sm">یک باگ ارسال شد</p>
-                  <p class="text-gray-400 text-xs">۱۲ ساعت پیش</p>
-                </div>
-              </li>
-
-              <li class="flex gap-x-3">
-                <div class="flex flex-col items-center">
-                  <img
-                    class="w-8 h-8 rounded-full"
-                    src="https://placehold.co/40x40/2D3748/E2E8F0"
-                    alt="avatar"
-                  />
-                </div>
-                <div class="flex flex-col -mt-1">
-                  <p class="text-white text-sm">داده A در صفحه X ویرایش شد</p>
-                  <p class="text-gray-400 text-xs">امروز، ۱۱:۵۹ صبح</p>
-                </div>
-              </li>
-            </ul>
-          </div>
-
-          <div class="flex flex-col gap-y-4">
-            <div class="flex items-center gap-x-2">
-              <h3 class="font-semibold text-white">آخرین کاربران</h3>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
-                class="w-5 h-5 text-gray-400"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"
-                />
-              </svg>
-            </div>
-
-            <ul class="flex flex-col gap-y-3">
-              <li class="flex items-center gap-x-3">
-                <img
-                  class="w-8 h-8 rounded-full"
-                  src="https://placehold.co/40x40/E2E8F0/4A5568"
-                  alt="avatar"
-                />
-                <span class="text-sm font-medium">احسان نصیری</span>
-              </li>
-              <li class="flex items-center gap-x-3">
-                <img
-                  class="w-8 h-8 rounded-full"
-                  src="https://placehold.co/40x40/f56565/4A5568"
-                  alt="avatar"
-                />
-                <span class="text-sm font-medium">ابولفضل</span>
-              </li>
-              <li class="flex items-center gap-x-3">
-                <img
-                  class="w-8 h-8 rounded-full"
-                  src="https://placehold.co/40x40/ed8936/4A5568"
-                  alt="avatar"
-                />
-                <span class="text-sm font-medium">محمد</span>
-              </li>
-              <li class="flex items-center gap-x-3">
-                <img
-                  class="w-8 h-8 rounded-full"
-                  src="https://placehold.co/40x40/E2E8F0/4A5568"
-                  alt="avatar"
-                />
-                <span class="text-sm font-medium">مهدی</span>
-              </li>
-              <li class="flex items-center gap-x-3">
-                <img
-                  class="w-8 h-8 rounded-full"
-                  src="https://placehold.co/40x40/E2E8F0/4A5568"
-                  alt="avatar"
-                />
-                <span class="text-sm font-medium">علی</span>
-              </li>
-              <li class="flex items-center gap-x-3">
-                <img
-                  class="w-8 h-8 rounded-full"
-                  src="https://placehold.co/40x40/4A5568/E2E8F0"
-                  alt="avatar"
-                />
-                <span class="text-sm font-medium">محسن</span>
-              </li>
-            </ul>
-          </div>
-
-          <div class="flex flex-col gap-y-4">
-            <div class="flex items-center gap-x-2">
-              <h3 class="font-semibold text-white">سرعت سایت</h3>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
-                class="w-5 h-5 text-gray-400"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"
-                />
-              </svg>
-            </div>
-
-            <div class="bg-[#1F283E] rounded-lg p-4 flex items-center justify-between gap-x-3">
-              <div class="w-16 h-16 relative">
-                <svg class="w-full h-full" viewBox="0 0 100 100">
+        <RailSection title={t("rail.performance")}>
+          <div className="rounded-card border border-line bg-panel p-4">
+            <div className="flex items-center gap-4">
+              <div className="relative size-16 shrink-0">
+                <svg viewBox="0 0 64 64" className="size-full -rotate-90">
                   <circle
-                    cx="50"
-                    cy="50"
-                    r="42"
-                    stroke="#3F4E6B"
-                    stroke-width="12"
+                    cx="32"
+                    cy="32"
+                    r="26"
                     fill="none"
+                    stroke="#1E2740"
+                    strokeWidth="7"
                   />
                   <circle
-                    cx="50"
-                    cy="50"
-                    r="42"
-                    stroke="#00C4FF"
-                    stroke-width="12"
+                    cx="32"
+                    cy="32"
+                    r="26"
                     fill="none"
-                    stroke-dasharray="264"
-                    stroke-dashoffset="142.5"
-                    stroke-linecap="round"
-                    transform="rotate(-90 50 50)"
+                    stroke="#2DE2C5"
+                    strokeWidth="7"
+                    strokeLinecap="round"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={
+                      circumference - (LOAD_SCORE / 100) * circumference
+                    }
                   />
                 </svg>
-                <span class="absolute inset-0 flex items-center justify-center text-white text-lg font-semibold">
-                  ۴۶٪
+                <span className="tabular absolute inset-0 grid place-items-center text-sm font-semibold">
+                  {formatNumber(LOAD_SCORE)}%
                 </span>
               </div>
-
-              <div class="flex-1">
-                <span class="text-gray-400 text-sm">زمان بارگذاری</span>
-              </div>
-
-              <div>
-                <span class="text-green-500 font-semibold">+۲۵٪</span>
+              <div className="min-w-0">
+                <p className="flex items-center gap-1.5 text-[13px] text-fg">
+                  <LuGauge
+                    aria-hidden="true"
+                    className="size-3.5 text-fg-subtle"
+                    strokeWidth={1.75}
+                  />
+                  {t("rail.loadTime")}
+                </p>
+                <p className="mt-1 text-xs font-medium text-success">
+                  +{formatNumber(25)}%
+                </p>
               </div>
             </div>
           </div>
-        </div>
+        </RailSection>
       </div>
-    </section>
+    </aside>
   );
 }

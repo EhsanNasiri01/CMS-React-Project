@@ -1,174 +1,167 @@
-import React, { useState } from "react";
+import { NavLink } from "react-router";
 import {
-  FaBars,
-  FaKeyboard,
-  FaRegUser,
-  FaRegCalendar,
-  FaSearch,
-  FaClock,
-  FaComments,
-} from "react-icons/fa";
-import { TbCommand } from "react-icons/tb";
-import { FiCompass, FiClock } from "react-icons/fi";
-import { LuBot } from "react-icons/lu";
-import { HiOutlineMegaphone } from "react-icons/hi2";
-import { CiChat1 } from "react-icons/ci";
-import { Link } from "react-router";
+  LuFileText,
+  LuImage,
+  LuLayoutDashboard,
+  LuLifeBuoy,
+  LuPanelLeftClose,
+  LuPanelLeftOpen,
+  LuSettings,
+  LuUsers,
+} from "react-icons/lu";
+import { useI18n } from "../../i18n/useI18n";
+import BrandMark from "../ui/BrandMark";
 
-// آیکون‌ها بر اساس لیبل
-const items = [
-  { id: 0, label: "صفحه اصلی", Icon: TbCommand, to: "/" },
-  { id: 1, label: "کاربران", Icon: FaRegUser, to: "/users" },
-  { id: 2, label: "ارتباط با ما", Icon: CiChat1, to: "/about" },
-  { id: 3, label: "تماس با ما", Icon: HiOutlineMegaphone, to: "/contact" },
+const PRIMARY = [
+  { to: "/", labelKey: "nav.dashboard", Icon: LuLayoutDashboard, end: true },
+  { to: "/users", labelKey: "nav.users", Icon: LuUsers },
+  { to: "/content", labelKey: "nav.content", Icon: LuFileText },
+  { to: "/media", labelKey: "nav.media", Icon: LuImage },
 ];
 
-// حذف سبز/سبز فیروزه‌ای و جایگزینی رنگ‌بندی اولیه با آبی و طیف قبلی
-function SidebarItem({ active, to, Icon, label, onClick, expanded }) {
+const SECONDARY = [
+  { to: "/settings", labelKey: "nav.settings", Icon: LuSettings },
+  { to: "/support", labelKey: "nav.support", Icon: LuLifeBuoy },
+];
+
+function NavItem({ to, end, Icon, label, expanded, onNavigate }) {
   return (
-    <Link
-      aria-label={label}
+    <NavLink
       to={to}
-      onClick={onClick}
-      className={[
-        "group relative flex items-center h-14 rounded-2xl transition-all duration-300 overflow-hidden",
-        expanded ? "w-52 px-4 gap-x-4" : "w-14 justify-center",
-        active
-          ? "bg-[#384A71] shadow-xl scale-105"
-          : "hover:bg-[#384A71]/80 hover:scale-105",
-        !active && "bg-[#24304B]",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-      style={{
-        boxShadow: active
-          ? "0 4px 24px 0 #2E3A5980,0 1.5px 16px 0 #384A71"
-          : undefined,
-        border: active ? "1.5px solid #384A71" : "1px solid transparent",
-        position: "relative",
-      }}
+      end={end}
+      onClick={onNavigate}
+      title={expanded ? undefined : label}
+      className={({ isActive }) =>
+        [
+          "group relative flex h-11 items-center rounded-lg text-sm",
+          "transition-colors duration-200 ease-out",
+          expanded ? "gap-3 px-3" : "justify-center px-0",
+          isActive
+            ? "bg-elevated font-medium text-fg"
+            : "text-fg-muted hover:bg-panel hover:text-fg",
+        ].join(" ")
+      }
     >
-      {/* Circular animated background when active */}
-      {active && (
-        <span className="absolute left-0 top-0 w-full h-full z-0 animate-pulse bg-[#384A71] rounded-2xl"></span>
+      {({ isActive }) => (
+        <>
+          {/* Active marker: an accent bar on the inline-start edge. Logical
+              positioning means it flips sides automatically under RTL. */}
+          <span
+            aria-hidden="true"
+            className={[
+              "absolute inset-y-2 start-0 w-[3px] rounded-full bg-accent",
+              "transition-opacity duration-200",
+              isActive ? "opacity-100" : "opacity-0",
+            ].join(" ")}
+          />
+          <Icon
+            className={[
+              "size-[18px] shrink-0 transition-colors duration-200",
+              isActive ? "text-accent" : "text-fg-subtle group-hover:text-fg",
+            ].join(" ")}
+            strokeWidth={1.75}
+          />
+          {expanded && <span className="truncate">{label}</span>}
+        </>
       )}
-      {/* Icon */}
-      <span className="z-10 flex items-center justify-center transition-all duration-300">
-        <Icon
-          className={[
-            "text-2xl transition-colors duration-300 drop-shadow-lg",
-            active
-              ? "text-[#ffffffce] scale-125"
-              : "text-[#B2BFEA] group-hover:text-[#ffffffce] group-hover:scale-110",
-          ].join(" ")}
-        />
-      </span>
-      {/* Label when expanded */}
-      {expanded && (
-        <span
-          className={[
-            "ml-3 whitespace-nowrap transition-all duration-300 text-base z-10",
-            active
-              ? "font-bold text-white tracking-wider drop-shadow"
-              : " text-[#A3B1D6]",
-          ].join(" ")}
-          style={{
-            letterSpacing: expanded ? "0.01em" : undefined,
-            filter: active ? "brightness(1.2)" : undefined,
-          }}
-        >
-          {label}
-        </span>
-      )}
-      {/* Decorative accent for Megaphone */}
-      {label === "Megaphone" && (
-        <span
-          className="absolute bottom-1 left-1/2 -translate-x-1/2 h-[3.5px] w-4 rounded-full bg-gradient-to-r from-[#4A79FF] to-[#508EFF] opacity-60 z-20"
-          aria-hidden
-        />
-      )}
-    </Link>
+    </NavLink>
   );
 }
 
-export default function Sidebar() {
-  const [active, setActive] = useState(0);
-  const [expanded, setExpanded] = useState(false);
+export default function Sidebar({
+  expanded,
+  onToggle,
+  onNavigate,
+  className = "",
+}) {
+  const { t } = useI18n();
 
   return (
     <aside
       className={[
-        "flex flex-col justify-between h-screen bg-dark-bg text-white z-40 border-l-2 border-darker-bg px-2 transition-all duration-500 ease-in-out shadow-2xl shadow-[#1E283D]/30 backdrop-blur-lg",
-        expanded ? "w-72" : "w-20",
+        "flex h-full shrink-0 flex-col border-e border-line bg-surface",
+        "transition-[width] duration-300 ease-out",
+        expanded ? "w-[248px]" : "w-[76px]",
+        className,
       ].join(" ")}
     >
-      <div className="flex flex-col justify-between pt-8 pb-6 h-screen items-center w-full">
-        <div className="flex flex-col items-center gap-y-9 w-full transition-all duration-500">
-          {/* Animated Sidebar Toggle Button */}
-          <button
-            aria-label={expanded ? "بستن منو" : "باز کردن منو"}
-            onClick={() => setExpanded((prev) => !prev)}
-            className={[
-              "px-5 h-14 flex items-center justify-center transition-all duration-300 rounded-2xl  bg-[#24304B]  hover:scale-105",
-              expanded ? "bg-[#384A71]" : "",
-            ].join(" ")}
-            tabIndex={0}
-          >
-            {/* pulse effect */}
-            {expanded && (
-              <span className="absolute animate-pulse  rounded-2xl z-0 inset-0"></span>
-            )}
-            <FaBars className="text-2xl text-white relative z-10 drop-shadow-lg" />
-          </button>
-          {/* Divider */}
-          <div className="w-10 h-[2px] bg-gradient-to-r from-[#1E283D] via-[#4269FF3a] to-[#1E283D] rounded-full my-1"></div>
-          {/* Box Of Menu - جذاب با بلور و شِدو و ترنزیشن */}
-          <aside
-            className={[
-              "w-full rounded-[32px] flex flex-col items-center gap-5 py-5 px-2",
-              "transition-all duration-500",
-              "bg-dark-bg",
-              " ",
-            ].join(" ")}
-            style={{
-              minHeight: expanded ? "380px" : "300px",
-            }}
-          >
-            {items.map(({ id, Icon, label, to }) => (
-              <SidebarItem
-                key={id}
-                active={active === id}
-                onClick={() => setActive(id)}
-                Icon={Icon}
-                label={label}
-                to={to}
-                expanded={expanded}
-              />
-            ))}
-          </aside>
+      {/* Brand */}
+      <div
+        className={[
+          "flex h-16 items-center border-b border-line",
+          expanded ? "gap-3 px-4" : "justify-center px-0",
+        ].join(" ")}
+      >
+        <BrandMark className="size-8 shrink-0" />
+        {expanded && (
+          <div className="min-w-0 leading-tight">
+            <div className="truncate text-[15px] font-semibold tracking-tight">
+              {t("app.name")}
+            </div>
+            <div className="eyebrow truncate !text-[10px]">
+              {t("app.tagline")}
+            </div>
+          </div>
+        )}
+      </div>
 
-          {/* Demo content area to the right */}
-          <section className="transition-all duration-300 text-white/80 mt-2"></section>
-        </div>
-        {/* Chat Button in Bottom with Glow and hover effect */}
-        <div className="px-5 pb-1">
-          <Link
-            to="/chat"
-            className={[
-              "relative w-14 h-14 flex items-center justify-center rounded-xl cursor-pointer transition-all duration-300",
-              "bg-gradient-to-tr from-[#24304B] via-[#2A3756aa] to-[#22315A] border-2 border-[#31416444] shadow-md",
-              "hover:shadow-lg hover:scale-105 ",
-            ].join(" ")}
-            aria-label="Chat"
-            style={{
-              boxShadow: "0 2px 18px #4269FF22, 0 1px 4px #222E4822",
-            }}
-          >
-            {/* Glow animation border when hover */}
-            <span className="absolute z-0 left-0 top-0 w-full h-full rounded-xl  animate-pulse bg-[#4269FF18] opacity-0 hover:opacity-100 transition-opacity  duration-300"></span>
-            <CiChat1 className="w-6 h-6 text-[#ffffffce] z-10" />
-          </Link>
-        </div>
+      <nav
+        aria-label={t("nav.primary")}
+        className="flex flex-1 flex-col gap-1 overflow-y-auto p-3"
+      >
+        {expanded && (
+          <p className="eyebrow px-3 pb-2 pt-1">{t("nav.primary")}</p>
+        )}
+        {PRIMARY.map((item) => (
+          <NavItem
+            key={item.to}
+            {...item}
+            label={t(item.labelKey)}
+            expanded={expanded}
+            onNavigate={onNavigate}
+          />
+        ))}
+
+        <div className="my-3 h-px bg-line" />
+
+        {SECONDARY.map((item) => (
+          <NavItem
+            key={item.to}
+            {...item}
+            label={t(item.labelKey)}
+            expanded={expanded}
+            onNavigate={onNavigate}
+          />
+        ))}
+      </nav>
+
+      {/* Collapse control — hidden on mobile where the sidebar is a drawer */}
+      <div className="hidden border-t border-line p-3 lg:block">
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={expanded}
+          aria-label={expanded ? t("nav.collapse") : t("nav.expand")}
+          title={expanded ? t("nav.collapse") : t("nav.expand")}
+          className={[
+            "flex h-11 w-full cursor-pointer items-center rounded-lg text-sm",
+            "text-fg-muted transition-colors duration-200 hover:bg-panel hover:text-fg",
+            expanded ? "gap-3 px-3" : "justify-center",
+          ].join(" ")}
+        >
+          {expanded ? (
+            <LuPanelLeftClose
+              className="size-[18px] rtl:rotate-180"
+              strokeWidth={1.75}
+            />
+          ) : (
+            <LuPanelLeftOpen
+              className="size-[18px] rtl:rotate-180"
+              strokeWidth={1.75}
+            />
+          )}
+          {expanded && <span>{t("nav.collapse")}</span>}
+        </button>
       </div>
     </aside>
   );

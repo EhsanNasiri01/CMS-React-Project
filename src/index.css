@@ -2,37 +2,279 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   Foundations
+   ========================================================================== */
 @layer base {
+  :root {
+    color-scheme: dark;
+
+    /* Semantic tokens — mirrored in tailwind.config.js */
+    --canvas: #070b14;
+    --surface: #0d1220;
+    --panel: #131a2b;
+    --elevated: #1a2338;
+    --line: #1e2740;
+    --fg: #e6ebf5;
+    --fg-muted: #8b9ab8;
+    --accent: #2de2c5;
+    --danger: #f5556d;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
-    direction: rtl;
-    @apply bg-darker-bg font-Dana;
+    @apply bg-canvas font-sans text-fg antialiased;
+    /* Subtle atmospheric wash so the canvas is never a flat black slab */
+    background-image:
+      radial-gradient(
+        900px 480px at 12% -8%,
+        rgba(45, 226, 197, 0.07),
+        transparent 60%
+      ),
+      radial-gradient(
+        800px 420px at 100% 0%,
+        rgba(96, 165, 250, 0.06),
+        transparent 55%
+      );
+    background-attachment: fixed;
   }
 
-  @font-face {
-    font-family: "Dana"; /* 400 */
-    src: url("../public/fonts/Dana/woff2/DanaFaNum-Regular.woff2")
-      format("woff2");
-    font-display: swap;
+  /* Persian mode swaps in a Farsi-capable face */
+  [dir="rtl"] body {
+    font-family: "Vazirmatn", "Instrument Sans", ui-sans-serif, sans-serif;
   }
-  @font-face {
-    font-family: "Dana Medium"; /* 500 */
-    src: url("../public/fonts/Dana/woff2/DanaFaNum-Medium.woff2")
-      format("woff2");
-    font-display: swap;
-  }
-  @font-face {
-    font-family: "Dana DemiBold"; /* 600 */
-    src: url("../public/fonts/Dana/woff2/DanaFaNum-DemiBold.woff2")
-      format("woff2");
-    font-display: swap;
-  }
-  .shadow-primary {
-    box-shadow: 0 4px 40px rgba(0, 246, 255, 50%);
 
-    font-weight: 600;
-    transition: all 0.5s;
+  /* Numeric data reads as columns, not text */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
   }
-  .shadow-primary:hover {
-    box-shadow: none;
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: rgba(45, 226, 197, 0.28);
+    color: #fff;
+  }
+
+  /* Scrollbars that belong to the console, not the OS */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #2c3857 transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #223052;
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #33456f;
+    background-clip: content-box;
+  }
+}
+
+/* ==========================================================================
+   Components
+   ========================================================================== */
+@layer components {
+  /* The one card shape used everywhere. Hairline border + inner top light. */
+  .surface-card {
+    @apply rounded-card border border-line bg-surface shadow-card;
+  }
+
+  .surface-card-hover {
+    @apply transition-colors duration-200 hover:border-line-strong;
+  }
+
+  /* Small uppercase mono label used for metric titles and table headers */
+  .eyebrow {
+    @apply font-mono text-[11px] uppercase tracking-[0.14em] text-fg-subtle;
+  }
+
+  /* Persian has no letter case, and wide tracking breaks its joined forms —
+     so the eyebrow drops back to the body face under RTL. */
+  [dir="rtl"] .eyebrow,
+  [dir="rtl"] .pill {
+    font-family: "Vazirmatn", "Instrument Sans", sans-serif;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .btn {
+    @apply inline-flex h-10 cursor-pointer items-center justify-center gap-2
+           rounded-lg px-4 text-sm font-medium
+           transition-all duration-200 ease-out
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn bg-accent text-canvas hover:bg-white;
+  }
+
+  .btn-ghost {
+    @apply btn border border-line bg-panel text-fg-muted
+           hover:border-line-strong hover:text-fg;
+  }
+
+  /* Status pill — always pairs color with a text label (never color alone) */
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1
+           font-mono text-[11px] uppercase tracking-wider;
+  }
+}
+
+/* ==========================================================================
+   SweetAlert2 — console theme
+   Lives here (not injected from JS) so it ships with the stylesheet.
+   ========================================================================== */
+.swal2-container {
+  backdrop-filter: blur(3px);
+}
+.swal2-popup {
+  background: #0d1220 !important;
+  border: 1px solid #1e2740 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.9) !important;
+  color: #e6ebf5 !important;
+  font-family: "Instrument Sans", ui-sans-serif, sans-serif !important;
+  padding: 1.75rem !important;
+}
+[dir="rtl"] .swal2-popup {
+  font-family: "Vazirmatn", "Instrument Sans", sans-serif !important;
+}
+.swal2-title {
+  color: #e6ebf5 !important;
+  font-size: 1.15rem !important;
+  font-weight: 600 !important;
+}
+.swal2-html-container {
+  color: #8b9ab8 !important;
+  font-size: 0.9rem !important;
+  margin-top: 0.35rem !important;
+  overflow: visible !important;
+}
+.swal2-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0 0 0.9rem;
+  text-align: start;
+}
+.swal2-field label {
+  color: #8b9ab8;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.swal2-field input {
+  background: #070b14;
+  border: 1px solid #1e2740;
+  border-radius: 10px;
+  color: #e6ebf5;
+  font-family: inherit;
+  font-size: 0.9rem;
+  height: 44px; /* touch target */
+  padding: 0 0.85rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+  width: 100%;
+}
+.swal2-field input::placeholder {
+  color: #5c6b87;
+}
+.swal2-field input:focus {
+  border-color: #2de2c5;
+  box-shadow: 0 0 0 3px rgba(45, 226, 197, 0.16);
+  outline: none;
+}
+.swal2-field input[aria-invalid="true"] {
+  border-color: #f5556d;
+}
+.swal2-field-error {
+  color: #f5556d;
+  font-size: 0.78rem;
+  min-height: 1rem;
+}
+/* role="alert" bar shown by Swal.showValidationMessage() */
+.swal2-validation-message {
+  background: rgba(245, 85, 109, 0.1) !important;
+  border: 1px solid rgba(245, 85, 109, 0.35) !important;
+  border-radius: 10px !important;
+  color: #f5556d !important;
+  font-size: 0.82rem !important;
+  gap: 0.5rem;
+  justify-content: flex-start !important;
+  margin: 0 0 0.25rem !important;
+  padding: 0.6rem 0.85rem !important;
+  text-align: start;
+}
+.swal2-validation-message::before {
+  background: #f5556d !important;
+  color: #070b14 !important;
+  font-size: 0.75rem !important;
+  height: 1.1rem !important;
+  line-height: 1.1rem !important;
+  margin: 0 !important;
+  min-width: 1.1rem !important;
+  width: 1.1rem !important;
+}
+
+.swal2-actions {
+  gap: 0.6rem !important;
+  margin-top: 0.5rem !important;
+}
+.swal2-styled.swal2-confirm {
+  background: #2de2c5 !important;
+  border-radius: 10px !important;
+  color: #070b14 !important;
+  font-weight: 600 !important;
+  min-height: 44px;
+  padding: 0 1.4rem !important;
+}
+.swal2-styled.swal2-confirm.swal2-danger {
+  background: #f5556d !important;
+  color: #fff !important;
+}
+.swal2-styled.swal2-cancel {
+  background: #131a2b !important;
+  border: 1px solid #1e2740 !important;
+  border-radius: 10px !important;
+  color: #8b9ab8 !important;
+  min-height: 44px;
+  padding: 0 1.4rem !important;
+}
+.swal2-styled:focus-visible {
+  box-shadow: 0 0 0 3px rgba(45, 226, 197, 0.35) !important;
+}
+.swal2-timer-progress-bar {
+  background: #2de2c5 !important;
+}
+
+/* ==========================================================================
+   Motion preferences
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }
