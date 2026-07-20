@@ -1,6 +1,5 @@
 import { LuBell, LuMenu, LuSearch } from "react-icons/lu";
 import { useI18n } from "../../i18n/useI18n";
-import LanguageTabs from "../ui/LanguageTabs";
 
 const UNREAD = 3;
 
@@ -38,8 +37,6 @@ export default function Header({ onOpenNav }) {
       </div>
 
       <div className="ms-auto flex items-center gap-2 md:gap-3">
-        <LanguageTabs />
-
         <button
           type="button"
           aria-label={`${t("header.notifications")} — ${t("header.unread", {
@@ -68,7 +65,7 @@ export default function Header({ onOpenNav }) {
             EN
           </span>
           <span className="hidden text-start leading-tight sm:block">
-            <span className="block text-sm font-medium">Albert</span>
+            <span className="block text-sm font-medium">Test</span>
             <span className="block text-[11px] text-fg-subtle">
               {t("header.role")}
             </span>

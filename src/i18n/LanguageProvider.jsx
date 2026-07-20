@@ -5,17 +5,10 @@ import { LanguageContext } from "./useI18n";
 const STORAGE_KEY = "aperture.lang";
 const DEFAULT_LANG = "en";
 
-function readStoredLang() {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored && LOCALES[stored] ? stored : DEFAULT_LANG;
-  } catch {
-    return DEFAULT_LANG;
-  }
-}
-
 export default function LanguageProvider({ children }) {
-  const [lang, setLang] = useState(readStoredLang);
+  // The language switcher is hidden, so every session starts in English
+  // regardless of a previously stored choice.
+  const [lang, setLang] = useState(DEFAULT_LANG);
   const dir = LOCALES[lang].dir;
 
 

@@ -1,5 +1,44 @@
-import { LuArrowRight, LuGauge } from "react-icons/lu";
+import {
+  LuArrowRight,
+  LuCheck,
+  LuDownload,
+  LuFileText,
+  LuFilm,
+  LuGauge,
+  LuImage,
+  LuPenLine,
+  LuUpload,
+  LuUserPlus,
+} from "react-icons/lu";
 import { useI18n } from "../../i18n/useI18n";
+
+const QUICK_ACTIONS = [
+  { key: "rail.newPost", Icon: LuPenLine },
+  { key: "rail.invite", Icon: LuUserPlus },
+  { key: "rail.upload", Icon: LuUpload },
+  { key: "rail.report", Icon: LuDownload },
+];
+
+const STORAGE = { used: 32.4, total: 50 };
+
+const STORAGE_BREAKDOWN = [
+  { key: "rail.images", Icon: LuImage, gb: 18.2, color: "bg-accent" },
+  { key: "rail.videos", Icon: LuFilm, gb: 9.6, color: "bg-info" },
+  { key: "rail.documents", Icon: LuFileText, gb: 4.6, color: "bg-warning" },
+];
+
+const TASKS = [
+  { key: "task.reviewDrafts", done: true },
+  { key: "task.replyComments", done: false },
+  { key: "task.publishRelease", done: false },
+  { key: "task.auditRoles", done: false },
+];
+
+const UPCOMING = [
+  { key: "event.newsletter", day: 24, time: "09:00", tone: "text-accent" },
+  { key: "event.maintenance", day: 26, time: "02:30", tone: "text-warning" },
+  { key: "event.standup", day: 27, time: "14:00", tone: "text-info" },
+];
 
 const ACTIVITY = [
   { key: "activity.projectUpdated", when: ["rail.now"], initials: "MK" },
@@ -10,12 +49,12 @@ const ACTIVITY = [
 
 const TEAM = [
 
-  { name: "John Smith", initials: "JS", online: true },
-  { name: "Emily Johnson", initials: "EJ", online: true },
-  { name: "Michael Brown", initials: "MB", online: false },
-  { name: "Sarah Wilson", initials: "SW", online: true },
-  { name: "David Miller", initials: "DM", online: false },
-  { name: "James Anderson", initials: "JA", online: false },
+  { name: "Test", initials: "TS", online: true },
+  { name: "Test", initials: "TS", online: true },
+  { name: "Test", initials: "TS", online: false },
+  { name: "Test", initials: "TS", online: true },
+  { name: "Test", initials: "TS", online: false },
+  { name: "Test", initials: "TS", online: false },
 
 ];
 
@@ -69,6 +108,27 @@ export default function LeftSidebar() {
       className="hidden w-[300px] shrink-0 overflow-y-auto border-s border-line bg-surface px-5 py-6 xl:block"
     >
       <div className="flex flex-col gap-8">
+        <RailSection title={t("rail.quickActions")}>
+          <div className="grid grid-cols-2 gap-2">
+            {QUICK_ACTIONS.map(({ key, Icon }) => (
+              <button
+                key={key}
+                type="button"
+                className="flex cursor-pointer flex-col items-start gap-2 rounded-card border border-line bg-panel p-3 text-start transition-colors duration-200 hover:border-accent/50 hover:bg-elevated"
+              >
+                <Icon
+                  aria-hidden="true"
+                  className="size-4 text-accent"
+                  strokeWidth={1.75}
+                />
+                <span className="text-[12px] leading-tight text-fg">
+                  {t(key)}
+                </span>
+              </button>
+            ))}
+          </div>
+        </RailSection>
+
         <RailSection
           title={t("rail.activity")}
           action={
@@ -111,8 +171,8 @@ export default function LeftSidebar() {
 
         <RailSection title={t("rail.team")}>
           <ul className="space-y-3">
-            {TEAM.map((member) => (
-              <li key={member.name} className="flex items-center gap-3">
+            {TEAM.map((member, i) => (
+              <li key={i} className="flex items-center gap-3">
                 <Avatar initials={member.initials} online={member.online} />
                 <span className="truncate text-[13px] text-fg">
                   {member.name}
@@ -168,6 +228,112 @@ export default function LeftSidebar() {
               </div>
             </div>
           </div>
+        </RailSection>
+
+        <RailSection title={t("rail.storage")}>
+          <div className="rounded-card border border-line bg-panel p-4">
+            <p className="tabular font-mono text-[13px] text-fg">
+              {t("rail.storageUsed", {
+                used: formatNumber(STORAGE.used, { maximumFractionDigits: 1 }),
+                total: formatNumber(STORAGE.total),
+              })}
+            </p>
+            {/* Stacked bar — one segment per media type */}
+            <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-elevated">
+              {STORAGE_BREAKDOWN.map((row) => (
+                <span
+                  key={row.key}
+                  aria-hidden="true"
+                  className={row.color}
+                  style={{ width: `${(row.gb / STORAGE.total) * 100}%` }}
+                />
+              ))}
+            </div>
+            <ul className="mt-4 space-y-2.5">
+              {STORAGE_BREAKDOWN.map(({ key, Icon, gb }) => (
+                <li key={key} className="flex items-center gap-2.5">
+                  <Icon
+                    aria-hidden="true"
+                    className="size-3.5 shrink-0 text-fg-subtle"
+                    strokeWidth={1.75}
+                  />
+                  <span className="text-[12px] text-fg-muted">{t(key)}</span>
+                  <span className="tabular ms-auto font-mono text-[11px] text-fg-subtle">
+                    {formatNumber(gb, { maximumFractionDigits: 1 })} GB
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </RailSection>
+
+        <RailSection
+          title={t("rail.tasks")}
+          action={
+            <span className="eyebrow !text-[10px] text-fg-subtle">
+              {t("rail.tasksLeft", {
+                n: formatNumber(TASKS.filter((task) => !task.done).length),
+              })}
+            </span>
+          }
+        >
+          <ul className="space-y-2">
+            {TASKS.map(({ key, done }) => (
+              <li key={key}>
+                <button
+                  type="button"
+                  aria-pressed={done}
+                  className="flex w-full cursor-pointer items-start gap-2.5 rounded-lg px-2 py-1.5 text-start transition-colors duration-200 hover:bg-panel"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={[
+                      "mt-0.5 grid size-4 shrink-0 place-items-center rounded border transition-colors duration-200",
+                      done
+                        ? "border-accent bg-accent text-canvas"
+                        : "border-line-strong",
+                    ].join(" ")}
+                  >
+                    {done && <LuCheck className="size-3" strokeWidth={3} />}
+                  </span>
+                  <span
+                    className={[
+                      "text-[12px] leading-snug",
+                      done ? "text-fg-subtle line-through" : "text-fg",
+                    ].join(" ")}
+                  >
+                    {t(key)}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </RailSection>
+
+        <RailSection title={t("rail.upcoming")}>
+          <ul className="space-y-2">
+            {UPCOMING.map(({ key, day, time, tone }) => (
+              <li
+                key={key}
+                className="flex items-center gap-3 rounded-card border border-line bg-panel p-3"
+              >
+                <span
+                  className={[
+                    "tabular grid size-9 shrink-0 place-items-center rounded-lg bg-elevated font-mono text-[13px] font-semibold",
+                    tone,
+                  ].join(" ")}
+                >
+                  {formatNumber(day)}
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-[12px] text-fg">{t(key)}</p>
+                  <p className="tabular mt-0.5 font-mono text-[10px] text-fg-subtle">
+                    {time}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </RailSection>
       </div>
     </aside>
