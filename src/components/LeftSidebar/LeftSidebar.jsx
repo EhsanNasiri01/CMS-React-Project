@@ -9,12 +9,14 @@ const ACTIVITY = [
 ];
 
 const TEAM = [
-  { name: "Ehsan Nasiri", initials: "EN", online: true },
-  { name: "Abolfazl Rezaei", initials: "AR", online: true },
-  { name: "Mohammad Karimi", initials: "MK", online: false },
-  { name: "Mehdi Sadeghi", initials: "MS", online: true },
-  { name: "Ali Ahmadi", initials: "AA", online: false },
-  { name: "Mohsen Tabrizi", initials: "MT", online: false },
+
+  { name: "John Smith", initials: "JS", online: true },
+  { name: "Emily Johnson", initials: "EJ", online: true },
+  { name: "Michael Brown", initials: "MB", online: false },
+  { name: "Sarah Wilson", initials: "SW", online: true },
+  { name: "David Miller", initials: "DM", online: false },
+  { name: "James Anderson", initials: "JA", online: false },
+
 ];
 
 const LOAD_SCORE = 46;

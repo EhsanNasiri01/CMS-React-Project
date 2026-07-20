@@ -3,10 +3,11 @@ import AppLayout from "../layout/AppLayout";
 import { useI18n } from "../../i18n/useI18n";
 
 const POSTS = [
+ [
   {
     id: 1,
     title: "Designing a dark-first admin console",
-    author: "Ehsan Nasiri",
+    author: "John Smith",
     status: "published",
     updated: "2026-07-18",
     views: 12480,
@@ -14,7 +15,7 @@ const POSTS = [
   {
     id: 2,
     title: "Migrating the dashboard to logical CSS properties",
-    author: "Abolfazl Rezaei",
+    author: "Emily Johnson",
     status: "review",
     updated: "2026-07-17",
     views: 3120,
@@ -22,7 +23,7 @@ const POSTS = [
   {
     id: 3,
     title: "A pragmatic guide to Firebase REST in React",
-    author: "Mohammad Karimi",
+    author: "Michael Brown",
     status: "draft",
     updated: "2026-07-15",
     views: 0,
@@ -30,7 +31,7 @@ const POSTS = [
   {
     id: 4,
     title: "Release notes — version 2.4",
-    author: "Mehdi Sadeghi",
+    author: "Sarah Wilson",
     status: "scheduled",
     updated: "2026-07-22",
     views: 0,
@@ -38,11 +39,12 @@ const POSTS = [
   {
     id: 5,
     title: "Accessibility checklist for data tables",
-    author: "Ali Ahmadi",
+    author: "David Miller",
     status: "published",
     updated: "2026-07-11",
     views: 8940,
   },
+]
 ];
 
 /* Status colour is always paired with its label, never the sole signal. */

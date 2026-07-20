@@ -68,7 +68,7 @@ export default function Header({ onOpenNav }) {
             EN
           </span>
           <span className="hidden text-start leading-tight sm:block">
-            <span className="block text-sm font-medium">Ehsan Nasiri</span>
+            <span className="block text-sm font-medium">Albert</span>
             <span className="block text-[11px] text-fg-subtle">
               {t("header.role")}
             </span>
